@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/chaos-core/chaos-plugin-auto-roles#readme",
   "peerDependencies": {
-    "rxjs": "^6.5.1"
+    "rxjs": "^6.5.1",
+    "chaos-core": "github:chaos-core/chaos-core#RxJs-6",
+    "discord.js": "^11.4.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -32,7 +34,6 @@
     "eslint-plugin-chai-expect": "^2.0.1",
     "eslint-watch": "^5.1.2",
     "mocha": "^5.2.0",
-    "nyc": "^14.0.0",
     "rxjs": "^6.5.1",
     "sinon": "^6.1.4",
     "sinon-chai": "^3.2.0"
