@@ -1,6 +1,6 @@
 const {EMPTY} = require('rxjs');
 const {flatMap, tap, toArray, catchError} = require('rxjs/operators');
-const {MockGuild, MockRole, MockGuildMember} = require('chaos-core').test.discordMocks;
+const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../support/create-chaos-bot');
 const DataKeys = require("../../lib/data-keys");
@@ -11,8 +11,14 @@ describe('JoinableRolesService', function () {
     this.chaos = createChaosBot();
     this.joinRolesService = new JoinRolesService(this.chaos);
 
-    this.guild = new MockGuild({client: this.chaos.discord});
-    this.role = new MockRole({guild: this.guild});
+    this.guild = {
+      id: SnowflakeUtil.generate(),
+    };
+
+    this.role = {
+      id: SnowflakeUtil.generate(),
+      guild: this.guild,
+    };
   });
 
   context('#allowRole', function () {
