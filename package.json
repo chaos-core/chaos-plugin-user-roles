@@ -1,6 +1,6 @@
 {
   "name": "chaos-plugin-joinable-roles",
-  "version": "1.0.0",
+  "version": "0.0.1-Rx6",
   "description": "Adds joinable role support to ChaosCore bots",
   "main": "index.js",
   "author": "Stephen A. Wilson",
@@ -13,12 +13,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chaos-core/chaos-plugin-auto-roles.git"
+    "url": "git+https://github.com/chaos-core/chaos-plugin-joinable-roles.git"
   },
   "bugs": {
-    "url": "https://github.com/chaos-core/chaos-plugin-auto-roles/issues"
+    "url": "https://github.com/chaos-core/chaos-plugin-joinable-roles/issues"
   },
-  "homepage": "https://github.com/chaos-core/chaos-plugin-auto-roles#readme",
+  "homepage": "https://github.com/chaos-core/chaos-plugin-joinable-roles#readme",
   "peerDependencies": {
     "rxjs": "^6.5.1",
     "chaos-core": "github:chaos-core/chaos-core#RxJs-6",
