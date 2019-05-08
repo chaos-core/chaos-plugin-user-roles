@@ -18,6 +18,7 @@ describe('JoinableRolesService', function () {
 
     this.role = {
       id: SnowflakeUtil.generate(),
+      name: 'test',
       guild: this.guild,
     };
   });
@@ -64,7 +65,7 @@ describe('JoinableRolesService', function () {
           toArray(),
           catchError((error) => {
             expect(error).to.an.instanceOf(NonJoinableRoleError);
-            expect(error.message).to.equal("Role can't be joined");
+            expect(error.message).to.equal("test can not be joined.");
             return EMPTY;
           }),
         ).subscribe(
@@ -112,7 +113,7 @@ describe('JoinableRolesService', function () {
             toArray(),
             catchError((error) => {
               expect(error).to.be.an.instanceOf(JoinRoleError);
-              expect(error.message).to.equal('User already has role');
+              expect(error.message).to.equal('You have already joined test.');
               return EMPTY;
             }),
           ).subscribe(
@@ -156,7 +157,7 @@ describe('JoinableRolesService', function () {
           toArray(),
           catchError((error) => {
             expect(error).to.be.an.instanceOf(NonJoinableRoleError);
-            expect(error.message).to.equal("Role can't be joined");
+            expect(error.message).to.equal("test can not be joined.");
             return EMPTY;
           }),
         ).subscribe(
@@ -192,7 +193,7 @@ describe('JoinableRolesService', function () {
             toArray(),
             catchError((error) => {
               expect(error).to.be.an.instanceOf(LeaveRoleError);
-              expect(error.message).to.equal('User is not in the role');
+              expect(error.message).to.equal('You have not joined test.');
               return EMPTY;
             }),
           ).subscribe(
