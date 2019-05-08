@@ -100,6 +100,25 @@ describe('JoinCommand', function () {
         ).subscribe(() => done(), error => done(error));
       });
 
+      context('when the role can not be found', function () {
+        beforeEach(function () {
+          this.guild.roles.delete(this.role.id);
+        });
+
+        it('sends a error message', function (done) {
+          sinon.spy(this.response, 'send');
+
+          this.command.run(this.context, this.response).pipe(
+            toArray(),
+            tap(() => {
+              expect(this.response.send).to.have.been.calledWith({
+                content: "The role 'test' could not be found",
+              });
+            }),
+          ).subscribe(() => done(), error => done(error));
+        });
+      });
+
       context('when the user has already joined the role', function () {
         beforeEach(function () {
           this.member.roles.set(this.role.id, this.role);
