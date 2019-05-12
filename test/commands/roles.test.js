@@ -1,5 +1,5 @@
 const {range, from} = require('rxjs');
-const {flatMap, tap, toArray, map, mapTo, takeLast, filter} = require('rxjs/operators');
+const {flatMap, tap, toArray, map, takeLast} = require('rxjs/operators');
 const {CommandContext, Response} = require('chaos-core');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
