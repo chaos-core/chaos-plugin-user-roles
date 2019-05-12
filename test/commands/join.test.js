@@ -3,12 +3,11 @@ const {CommandContext, Response} = require('chaos-core');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../support/create-chaos-bot');
-const JoinCommand = require('../../lib/commands/join');
 
 describe('JoinCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.command = new JoinCommand(this.chaos);
+    this.command = this.chaos.getCommand('join');
     this.command.onListen();
 
     this.guild = {

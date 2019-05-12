@@ -3,12 +3,11 @@ const {CommandContext, Response} = require('chaos-core');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../support/create-chaos-bot');
-const LeaveCommand = require('../../lib/commands/leave');
 
 describe('LeaveCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.command = new LeaveCommand(this.chaos);
+    this.command = this.chaos.getCommand('leave');
     this.command.onListen();
 
     this.guild = {
