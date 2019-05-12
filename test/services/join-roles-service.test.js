@@ -9,7 +9,7 @@ const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError
 describe('JoinableRolesService', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.joinRolesService = new JoinRolesService(this.chaos);
+    this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
 
     this.guild = {
       id: SnowflakeUtil.generate(),
@@ -396,18 +396,18 @@ describe('JoinableRolesService', function () {
 
     context('when there are joinable roles', function () {
       beforeEach(function (done) {
+        this.roles = [];
+
         range(0, 6).pipe(
           map(roleNum => ({
             id: SnowflakeUtil.generate(),
             name: `role-${roleNum}`,
             guild: this.guild,
           })),
+          tap(role => this.roles.push(role)),
           tap(role => this.guild.roles.set(role.id, role)),
-          flatMap(role => this.joinRolesService.allowRole(role).pipe(
-            mapTo(role),
-          )),
+          flatMap(role => this.joinRolesService.allowRole(role)),
           toArray(),
-          tap(roles => this.roles = roles),
         ).subscribe(() => done(), error => done(error));
       });
 
@@ -415,9 +415,9 @@ describe('JoinableRolesService', function () {
         this.joinRolesService.getAvailableMemberRoles(this.member).pipe(
           first(),
           tap((emitted) => {
-            expect(emitted.map(r => r.name)).to.deep.equal(
-              this.roles.map(r => r.name),
-            );
+            expect(emitted.map(r => r.name)).to.deep.equal([
+              "role-0", "role-1", "role-2", "role-3", "role-4", "role-5",
+            ]);
           }),
         ).subscribe(() => done(), error => done(error));
       });
@@ -428,11 +428,6 @@ describe('JoinableRolesService', function () {
             takeLast(3),
             tap(role => this.member.roles.set(role.id, role)),
             toArray(),
-            flatMap((joinedRoles) => from(this.roles).pipe(
-              filter(role => joinedRoles.indexOf(role) === -1),
-              toArray(),
-            )),
-            tap(roles => this.unjoinedRoles = roles),
           ).subscribe(() => done(), error => done(error));
         });
 
@@ -440,9 +435,9 @@ describe('JoinableRolesService', function () {
           this.joinRolesService.getAvailableMemberRoles(this.member).pipe(
             first(),
             tap((emitted) => {
-              expect(emitted.map(r => r.name)).to.deep.equal(
-                this.unjoinedRoles.map(r => r.name),
-              );
+              expect(emitted.map(r => r.name)).to.deep.equal([
+                "role-0", "role-1", "role-2",
+              ]);
             }),
           ).subscribe(() => done(), error => done(error));
         });
