@@ -1,5 +1,5 @@
-const {of, from, EMPTY, zip} = require('rxjs');
-const {flatMap, tap, toArray, catchError, map, first} = require('rxjs/operators');
+const {of, from, EMPTY, zip, range} = require('rxjs');
+const {flatMap, tap, toArray, catchError, map, first, takeLast, mapTo} = require('rxjs/operators');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../support/create-chaos-bot');
@@ -24,7 +24,7 @@ describe('JoinableRolesService', function () {
     };
   });
 
-  context('#allowRole', function () {
+  describe('#allowRole', function () {
     it('marks the role as joinable', function (done) {
       this.joinRolesService.allowRole(this.role).pipe(
         toArray(),
@@ -36,7 +36,7 @@ describe('JoinableRolesService', function () {
     });
   });
 
-  context('#removeRole', function () {
+  describe('#removeRole', function () {
     it('marks the role as not joinable', function (done) {
       this.joinRolesService.removeRole(this.role).pipe(
         toArray(),
@@ -48,7 +48,7 @@ describe('JoinableRolesService', function () {
     });
   });
 
-  context('#addUserToRole', function () {
+  describe('#addUserToRole', function () {
     beforeEach(function () {
       this.member = {
         guild: this.guild,
@@ -137,7 +137,7 @@ describe('JoinableRolesService', function () {
     });
   });
 
-  context('#removeUserFromRole', function () {
+  describe('#removeUserFromRole', function () {
     beforeEach(function () {
       this.member = {
         id: SnowflakeUtil.generate(),
@@ -207,7 +207,7 @@ describe('JoinableRolesService', function () {
     });
   });
 
-  context('#isRoleAllowed', function () {
+  describe('#isRoleAllowed', function () {
     context('when the role is joinable in the server', function () {
       beforeEach(function (done) {
         this.joinRolesService.allowRole(this.role)
@@ -236,7 +236,7 @@ describe('JoinableRolesService', function () {
     });
   });
 
-  context('#getAllowedRoles', function () {
+  describe('#getAllowedRoles', function () {
     context('when there are no joinable roles', function () {
       it('emits an empty array', function (done) {
         this.joinRolesService.getAllowedRoles(this.guild).pipe(
@@ -292,6 +292,77 @@ describe('JoinableRolesService', function () {
             );
           }),
         ).subscribe(() => done(), error => done(error));
+      });
+    });
+  });
+
+  describe('#getJoinedMemberRoles', function () {
+    beforeEach(function () {
+      this.member = {
+        guild: this.guild,
+        roles: new Collection(),
+      };
+    });
+
+    context('when there are no joinable roles', function () {
+      it('emits an empty array', function (done) {
+        this.joinRolesService.getJoinedMemberRoles(this.member).pipe(
+          first(),
+          tap((emitted) => {
+            expect(emitted).to.deep.equal([]);
+          }),
+        ).subscribe(() => done(), error => done(error));
+      });
+    });
+
+    context('when there are joinable roles', function () {
+      beforeEach(function (done) {
+        range(0,6).pipe(
+          map(roleNum => ({
+            id: SnowflakeUtil.generate(),
+            name: `role-${roleNum}`,
+            guild: this.guild,
+          })),
+          tap(role => this.guild.roles.set(role.id, role)),
+          flatMap(role => this.joinRolesService.allowRole(role).pipe(
+            mapTo(role),
+          )),
+          toArray(),
+          tap(roles => this.roles = roles),
+        ).subscribe(() => done(), error => done(error));
+      });
+
+      context('when the user has not joined any roles', function () {
+        it('emits an empty array', function (done) {
+          this.joinRolesService.getJoinedMemberRoles(this.member).pipe(
+            first(),
+            tap((emitted) => {
+              expect(emitted).to.deep.equal([]);
+            }),
+          ).subscribe(() => done(), error => done(error));
+        });
+      });
+
+      context('when the user has joined some roles', function () {
+        beforeEach(function (done) {
+          from(this.roles).pipe(
+            takeLast(3),
+            tap(role => this.member.roles.set(role.id, role)),
+            toArray(),
+            tap(roles => this.joinedRoles = roles),
+          ).subscribe(() => done(), error => done(error));
+        });
+
+        it('emits the roles the user has joined', function (done) {
+          this.joinRolesService.getJoinedMemberRoles(this.member).pipe(
+            first(),
+            tap((roles) => {
+              expect(roles.map(r => r.name)).to.deep.equal(
+                this.joinedRoles.map(r => r.name),
+              );
+            }),
+          ).subscribe(() => done(), error => done(error));
+        });
       });
     });
   });
