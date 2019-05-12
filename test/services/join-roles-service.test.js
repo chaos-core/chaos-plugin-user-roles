@@ -1,11 +1,10 @@
-const {of, from, EMPTY, zip, range} = require('rxjs');
-const {flatMap, tap, toArray, catchError, map, first, takeLast, mapTo, filter} = require('rxjs/operators');
+const {of, from, EMPTY, zip, range, throwError} = require('rxjs');
+const {flatMap, tap, toArray, catchError, map, first, takeLast, mapTo} = require('rxjs/operators');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../support/create-chaos-bot');
 const DataKeys = require("../../lib/data-keys");
-const JoinRolesService = require('../../lib/services/join-roles-service');
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError} = require("../../lib/errors");
+const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../../lib/errors");
 
 describe('JoinableRolesService', function () {
   beforeEach(function () {
@@ -238,12 +237,15 @@ describe('JoinableRolesService', function () {
 
   describe('#getAllowedRoles', function () {
     context('when there are no joinable roles', function () {
-      it('emits an empty array', function (done) {
+      it('throws a NoJoinableRolesError', function (done) {
         this.joinRolesService.getAllowedRoles(this.guild).pipe(
-          first(),
-          tap((emitted) => {
-            expect(emitted).to.deep.equal([]);
+          catchError((error) => {
+            expect(error).to.be.an.instanceOf(NoJoinableRolesError);
+            expect(error.message).to.be.equal("No joinable roles were found.");
+            return EMPTY;
           }),
+          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
+          toArray(),
         ).subscribe(() => done(), error => done(error));
       });
     });
@@ -305,12 +307,15 @@ describe('JoinableRolesService', function () {
     });
 
     context('when there are no joinable roles', function () {
-      it('emits an empty array', function (done) {
+      it('throws a NoJoinableRolesError', function (done) {
         this.joinRolesService.getJoinedMemberRoles(this.member).pipe(
-          first(),
-          tap((emitted) => {
-            expect(emitted).to.deep.equal([]);
+          catchError((error) => {
+            expect(error).to.be.an.instanceOf(NoJoinableRolesError);
+            expect(error.message).to.be.equal("No joinable roles were found.");
+            return EMPTY;
           }),
+          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
+          toArray(),
         ).subscribe(() => done(), error => done(error));
       });
     });
@@ -376,12 +381,15 @@ describe('JoinableRolesService', function () {
     });
 
     context('when there are no joinable roles', function () {
-      it('emits an empty array', function (done) {
+      it('throws a NoJoinableRolesError', function (done) {
         this.joinRolesService.getAvailableMemberRoles(this.member).pipe(
-          first(),
-          tap((roles) => {
-            expect(roles.map(r => r.name)).to.deep.equal([]);
+          catchError((error) => {
+            expect(error).to.be.an.instanceOf(NoJoinableRolesError);
+            expect(error.message).to.be.equal("No joinable roles were found.");
+            return EMPTY;
           }),
+          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
+          toArray(),
         ).subscribe(() => done(), error => done(error));
       });
     });
