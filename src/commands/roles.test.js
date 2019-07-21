@@ -3,13 +3,12 @@ const {flatMap, tap, toArray, map, takeLast} = require('rxjs/operators');
 const {CommandContext, Response} = require('chaos-core');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
-const createChaosBot = require('../support/create-chaos-bot');
+const createChaosBot = require('../../test/create-chaos-bot');
 
 describe('RolesCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
     this.command = this.chaos.getCommand('roles');
-    this.command.onListen();
 
     this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
 

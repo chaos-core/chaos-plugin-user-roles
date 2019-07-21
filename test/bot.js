@@ -10,7 +10,7 @@ new ChaosCore({
   },
 
   plugins: [
-    require('../index'),
+    require('../src/plugin'),
   ],
 
   ...localConfig,

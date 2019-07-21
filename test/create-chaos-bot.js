@@ -1,9 +1,9 @@
-const {createChaosStub} = require("chaos-core").test;
+const ChaosCore = require("chaos-core");
 
 const createChaosBot = (config) => {
-  return createChaosStub({
+  return ChaosCore.test.createChaosStub({
     plugins: [
-      require('../../index.js'),
+      require('../src/plugin'),
     ],
 
     ...config,

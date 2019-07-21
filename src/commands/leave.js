@@ -2,9 +2,9 @@ const {of} = require('rxjs/index');
 const {flatMap} = require('rxjs/operators/index');
 const {Command} = require("chaos-core");
 
-const {catchChaosError} = require("../error-handlers");
-const {catchJoinableRoleError} = require("../error-handlers");
-const {catchDiscordApiError} = require("../error-handlers");
+const {catchChaosError} = require("../lib/error-handlers");
+const {catchJoinableRoleError} = require("../lib/error-handlers");
+const {catchDiscordApiError} = require("../lib/error-handlers");
 
 class LeaveCommand extends Command {
   constructor(chaos) {
@@ -20,17 +20,14 @@ class LeaveCommand extends Command {
     });
   }
 
-  onListen() {
-    this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
-    this.roleService = this.chaos.getService('core', 'RoleService');
-  }
-
   run(context, response) {
+    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    const roleService = this.chaos.getService('core', 'RoleService');
     const roleString = context.args.role;
 
     return of('').pipe(
-      flatMap(() => this.roleService.findRole(context.guild, roleString)),
-      flatMap(role => this.joinRolesService.removeUserFromRole(context.member, role).pipe(
+      flatMap(() => roleService.findRole(context.guild, roleString)),
+      flatMap(role => joinRolesService.removeUserFromRole(context.member, role).pipe(
         flatMap(() => response.send({
           content: `You have been removed from the role ${role.name}.`,
         })),

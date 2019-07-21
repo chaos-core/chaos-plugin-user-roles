@@ -2,9 +2,9 @@ const {of, from, EMPTY, zip, range, throwError} = require('rxjs');
 const {flatMap, tap, toArray, catchError, map, first, takeLast, mapTo} = require('rxjs/operators');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
-const createChaosBot = require('../support/create-chaos-bot');
-const DataKeys = require("../../lib/data-keys");
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../../lib/errors");
+const createChaosBot = require('../../test/create-chaos-bot');
+const DataKeys = require("../lib/data-keys");
+const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../lib/errors");
 
 describe('JoinableRolesService', function () {
   beforeEach(function () {

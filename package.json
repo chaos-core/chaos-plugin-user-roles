@@ -2,9 +2,12 @@
   "name": "chaos-plugin-joinable-roles",
   "version": "0.0.2-Rx6",
   "description": "Adds joinable role support to ChaosCore bots",
-  "main": "index.js",
+  "main": "src/plugin.js",
   "author": "Stephen A. Wilson",
   "license": "MIT",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "bot": "node --preserve-symlinks test/bot.js",
     "test": "mocha",
@@ -20,16 +23,14 @@
   },
   "homepage": "https://github.com/chaos-core/chaos-plugin-joinable-roles#readme",
   "peerDependencies": {
-    "chaos-core": "github:chaos-core/chaos-core#RxJs-6",
-    "discord.js": "^11.4.2",
+    "chaos-core": "^4.0.1-dev",
     "rxjs": "^6.5.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-subset": "^1.6.0",
-    "chaos-core": "github:chaos-core/chaos-core#RxJs-6",
-    "chaos-data-disk": "github:chaos-core/chaos-data-disk#RxJs-6",
-    "chaos-data-memory": "github:chaos-core/chaos-data-memory#RxJs-6",
+    "chaos-core": "^4.0.1-dev",
+    "chaos-data-memory": "^4.0.0-dev",
     "discord.js": "^11.4.2",
     "eslint": "^5.16.0",
     "eslint-plugin-chai-expect": "^2.0.1",

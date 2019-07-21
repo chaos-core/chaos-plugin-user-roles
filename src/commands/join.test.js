@@ -2,13 +2,12 @@ const {toArray, tap} = require('rxjs/operators');
 const {CommandContext, Response} = require('chaos-core');
 const {Collection, SnowflakeUtil} = require('discord.js');
 
-const createChaosBot = require('../support/create-chaos-bot');
+const createChaosBot = require('../../test/create-chaos-bot');
 
-describe('LeaveCommand', function () {
+describe('JoinCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.command = this.chaos.getCommand('leave');
-    this.command.onListen();
+    this.command = this.chaos.getCommand('join');
 
     this.guild = {
       id: SnowflakeUtil.generate(),
@@ -55,7 +54,7 @@ describe('LeaveCommand', function () {
     );
   });
 
-  describe('!leave {role}', function () {
+  describe('!join {role}', function () {
     beforeEach(function () {
       this.role = {
         id: SnowflakeUtil.generate(),
@@ -63,7 +62,6 @@ describe('LeaveCommand', function () {
         guild: this.guild,
       };
       this.guild.roles.set(this.role.id, this.role);
-      this.member.roles.set(this.role.id, this.role);
 
       this.context.args.role = this.role.name;
     });
@@ -76,13 +74,13 @@ describe('LeaveCommand', function () {
           .subscribe(() => done(), (error) => done(error));
       });
 
-      it('removes the role from the user', function (done) {
-        sinon.spy(this.context.member, 'removeRole');
+      it('adds the role to the user', function (done) {
+        sinon.spy(this.context.member, 'addRole');
 
         this.command.run(this.context, this.response).pipe(
           toArray(),
           tap(() => {
-            expect(this.context.member.removeRole).to.have.been.calledWith(this.role);
+            expect(this.context.member.addRole).to.have.been.calledWith(this.role);
           }),
         ).subscribe(() => done(), error => done(error));
       });
@@ -94,7 +92,7 @@ describe('LeaveCommand', function () {
           toArray(),
           tap(() => {
             expect(this.response.send).to.have.been.calledWith({
-              content: "You have been removed from the role test.",
+              content: "You have been added to the role test.",
             });
           }),
         ).subscribe(() => done(), error => done(error));
@@ -119,9 +117,9 @@ describe('LeaveCommand', function () {
         });
       });
 
-      context('when the user had not joined the role', function () {
+      context('when the user has already joined the role', function () {
         beforeEach(function () {
-          this.member.roles.delete(this.role.id);
+          this.member.roles.set(this.role.id, this.role);
         });
 
         it('sends a error message', function (done) {
@@ -131,7 +129,7 @@ describe('LeaveCommand', function () {
             toArray(),
             tap(() => {
               expect(this.response.send).to.have.been.calledWith({
-                content: "You have not joined test.",
+                content: "You have already joined test.",
               });
             }),
           ).subscribe(() => done(), error => done(error));

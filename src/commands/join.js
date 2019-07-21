@@ -2,9 +2,9 @@ const {of} = require('rxjs');
 const {flatMap} = require('rxjs/operators');
 const {Command} = require("chaos-core");
 
-const {catchChaosError} = require("../error-handlers");
-const {catchJoinableRoleError} = require("../error-handlers");
-const {catchDiscordApiError} = require("../error-handlers");
+const {catchChaosError} = require("../lib/error-handlers");
+const {catchJoinableRoleError} = require("../lib/error-handlers");
+const {catchDiscordApiError} = require("../lib/error-handlers");
 
 class JoinCommand extends Command {
   constructor(chaos) {
@@ -20,17 +20,14 @@ class JoinCommand extends Command {
     });
   }
 
-  onListen() {
-    this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
-    this.roleService = this.chaos.getService('core', 'RoleService');
-  }
-
   run(context, response) {
+    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    const roleService = this.chaos.getService('core', 'RoleService');
     const roleString = context.args.role;
 
     return of('').pipe(
-      flatMap(() => this.roleService.findRole(context.guild, roleString)),
-      flatMap(role => this.joinRolesService.addUserToRole(context.member, role).pipe(
+      flatMap(() => roleService.findRole(context.guild, roleString)),
+      flatMap(role => joinRolesService.addUserToRole(context.member, role).pipe(
         flatMap(() => response.send({
           content: `You have been added to the role ${role.name}.`,
         })),

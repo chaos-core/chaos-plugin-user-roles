@@ -5,7 +5,15 @@
   },
   "env": {
     "node": true,
-    "es6": true
+    "es6": true,
+    "mocha": true
+  },
+  "plugins": [
+    "chai-expect"
+  ],
+  "globals": {
+    "expect": "readonly",
+    "sinon": "readonly"
   },
   "extends": "eslint:recommended",
   "rules": {

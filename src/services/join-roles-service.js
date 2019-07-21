@@ -2,8 +2,8 @@ const {of, throwError, from} = require('rxjs');
 const {flatMap, tap, map, mapTo, filter, toArray} = require('rxjs/operators');
 const {Service} = require("chaos-core");
 
-const DataKeys = require("../data-keys");
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../errors");
+const DataKeys = require("../lib/data-keys");
+const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../lib/errors");
 
 class JoinRolesService extends Service {
   allowRole(role) {

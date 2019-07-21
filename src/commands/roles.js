@@ -3,9 +3,9 @@ const {flatMap, map, toArray} = require('rxjs/operators');
 const {Command} = require("chaos-core");
 const {RichEmbed} = require("discord.js");
 
-const {catchChaosError} = require("../error-handlers");
-const {catchJoinableRoleError} = require("../error-handlers");
-const {catchDiscordApiError} = require("../error-handlers");
+const {catchChaosError} = require("../lib/error-handlers");
+const {catchJoinableRoleError} = require("../lib/error-handlers");
+const {catchDiscordApiError} = require("../lib/error-handlers");
 
 class RolesCommand extends Command {
   constructor(chaos) {
@@ -15,15 +15,13 @@ class RolesCommand extends Command {
     });
   }
 
-  onListen() {
-    this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
-  }
-
   run(context, response) {
+    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+
     return of('').pipe(
       flatMap(() => concat(
-        this.joinRolesService.getAvailableMemberRoles(context.member),
-        this.joinRolesService.getJoinedMemberRoles(context.member),
+        joinRolesService.getAvailableMemberRoles(context.member),
+        joinRolesService.getJoinedMemberRoles(context.member),
       )),
       map(roles => roles.map(r => `\`${r.name}\``).join(', ')),
       toArray(),
