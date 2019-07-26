@@ -1,57 +1,17 @@
-const {toArray, tap} = require('rxjs/operators');
-const {CommandContext, Response} = require('chaos-core');
-const {Collection, SnowflakeUtil} = require('discord.js');
+const {tap} = require('rxjs/operators');
+const {SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
 describe('JoinCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.command = this.chaos.getCommand('join');
+    this.test$ = this.chaos.testCommand({
+      pluginName: 'joinableRoles',
+      commandName: 'join',
+    });
 
-    this.guild = {
-      id: SnowflakeUtil.generate(),
-      roles: new Collection(),
-    };
-
-    this.member = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      roles: new Collection(),
-      addRole: function (role) {
-        this.roles.set(role.id, role);
-        return Promise.resolve(this);
-      },
-      removeRole: function (role) {
-        this.roles.delete(role.id);
-        return Promise.resolve(this);
-      },
-    };
-
-    this.channel = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      send: message => Promise.resolve({
-        id: SnowflakeUtil.generate(),
-        content: message,
-      }),
-    };
-
-    this.message = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      member: this.member,
-      channel: this.channel,
-    };
-
-    this.context = new CommandContext(
-      this.message,
-      this.command,
-    );
-
-    this.response = new Response(
-      this.message,
-    );
+    this.guild = this.test$.message.guild;
   });
 
   describe('!join {role}', function () {
@@ -63,7 +23,7 @@ describe('JoinCommand', function () {
       };
       this.guild.roles.set(this.role.id, this.role);
 
-      this.context.args.role = this.role.name;
+      this.test$.args.role = this.role.name;
     });
 
     context('when the role is joinable', function () {
@@ -75,25 +35,21 @@ describe('JoinCommand', function () {
       });
 
       it('adds the role to the user', function (done) {
-        sinon.spy(this.context.member, 'addRole');
+        sinon.spy(this.test$.message.member, 'addRole');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
+        this.test$.pipe(
           tap(() => {
-            expect(this.context.member.addRole).to.have.been.calledWith(this.role);
+            expect(this.test$.message.member.addRole).to.have.been.calledWith(this.role);
           }),
         ).subscribe(() => done(), error => done(error));
       });
 
       it('sends a success message', function (done) {
-        sinon.spy(this.response, 'send');
+        sinon.spy(this.test$.message.channel, 'send');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
+        this.test$.pipe(
           tap(() => {
-            expect(this.response.send).to.have.been.calledWith({
-              content: "You have been added to the role test.",
-            });
+            expect(this.test$.message.channel.send).to.have.been.calledWith("You have been added to the role test.");
           }),
         ).subscribe(() => done(), error => done(error));
       });
@@ -104,14 +60,11 @@ describe('JoinCommand', function () {
         });
 
         it('sends a error message', function (done) {
-          sinon.spy(this.response, 'send');
+          sinon.spy(this.test$.message.channel, 'send');
 
-          this.command.run(this.context, this.response).pipe(
-            toArray(),
+          this.test$.pipe(
             tap(() => {
-              expect(this.response.send).to.have.been.calledWith({
-                content: "The role 'test' could not be found",
-              });
+              expect(this.test$.message.channel.send).to.have.been.calledWith("The role 'test' could not be found");
             }),
           ).subscribe(() => done(), error => done(error));
         });
@@ -119,18 +72,15 @@ describe('JoinCommand', function () {
 
       context('when the user has already joined the role', function () {
         beforeEach(function () {
-          this.member.roles.set(this.role.id, this.role);
+          this.test$.message.member.roles.set(this.role.id, this.role);
         });
 
         it('sends a error message', function (done) {
-          sinon.spy(this.response, 'send');
+          sinon.spy(this.test$.message.channel, 'send');
 
-          this.command.run(this.context, this.response).pipe(
-            toArray(),
+          this.test$.pipe(
             tap(() => {
-              expect(this.response.send).to.have.been.calledWith({
-                content: "You have already joined test.",
-              });
+              expect(this.test$.message.channel.send).to.have.been.calledWith("You have already joined test.");
             }),
           ).subscribe(() => done(), error => done(error));
         });
@@ -139,25 +89,21 @@ describe('JoinCommand', function () {
 
     context('when the role is not joinable', function () {
       it('does not add the role to the user', function (done) {
-        sinon.spy(this.context.member, 'addRole');
+        sinon.spy(this.test$.message.member, 'addRole');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
+        this.test$.pipe(
           tap(() => {
-            expect(this.context.member.addRole).not.to.have.been.called;
+            expect(this.test$.message.member.addRole).not.to.have.been.called;
           }),
         ).subscribe(() => done(), error => done(error));
       });
 
       it('sends a error message', function (done) {
-        sinon.spy(this.response, 'send');
+        sinon.spy(this.test$.message.channel, 'send');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
+        this.test$.pipe(
           tap(() => {
-            expect(this.response.send).to.have.been.calledWith({
-              content: "test can not be joined.",
-            });
+            expect(this.test$.message.channel.send).to.have.been.calledWith("test can not be joined.");
           }),
         ).subscribe(() => done(), error => done(error));
       });

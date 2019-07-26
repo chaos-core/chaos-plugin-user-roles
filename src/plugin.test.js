@@ -28,18 +28,22 @@ describe('Plugin: joinableRoles', function () {
       ]);
     });
 
-    it('Adds commands to the bot', function () {
-      expect(this.chaos.commandManager.commands.map(c => c.name)).to.containSubset([
-        "join",
-        "leave",
-        "roles",
-      ]);
+    [
+      "JoinRolesService",
+    ].forEach((service) => {
+      it(`Adds service ${service} to the bot`, function () {
+        expect(this.chaos.getService('joinableRoles', service)).not.to.be.undefined;
+      });
     });
 
-    it('Adds services to the bot', function () {
-      expect(this.chaos.servicesManager.services.map(c => c.name)).to.containSubset([
-        "JoinRolesService",
-      ]);
+    [
+      "join",
+      "leave",
+      "roles",
+    ].forEach((command) => {
+      it(`Adds command ${command} to the bot`, function () {
+        expect(this.chaos.getCommand(command)).not.to.be.undefined;
+      });
     });
   });
 });
