@@ -37,6 +37,14 @@ describe('Plugin: UserRoles', function () {
     });
 
     [
+      "addRole",
+    ].forEach((configAction) => {
+      it(`Adds config action ${configAction} to the bot`, function () {
+        expect(this.chaos.getConfigAction('UserRoles', configAction)).not.to.be.undefined;
+      });
+    });
+
+    [
       "join",
       "leave",
       "roles",

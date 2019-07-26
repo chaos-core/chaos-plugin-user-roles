@@ -6,6 +6,10 @@ module.exports = {
     require('./services/user-roles-service'),
   ],
 
+  configActions: [
+    require('./config/add-role'),
+  ],
+
   commands: [
     require('./commands/join'),
     require('./commands/leave'),
