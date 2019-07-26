@@ -4,7 +4,7 @@ const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 const DataKeys = require("../lib/data-keys");
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
+const {UserRoleError, LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
 
 describe('Service: UserRolesService', function () {
   beforeEach(function () {
@@ -24,26 +24,80 @@ describe('Service: UserRolesService', function () {
   });
 
   describe('#allowRole', function () {
-    it('marks the role as joinable', function (done) {
-      this.UserRolesService.allowRole(this.role).pipe(
-        toArray(),
-        flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
-        tap((allowedIds) => {
-          expect(allowedIds[this.role.id]).to.be.true;
-        }),
-      ).subscribe(() => done(), (error) => done(error));
+    context('when the role is not marked as joinable', function () {
+      it('marks the role as joinable', function (done) {
+        this.UserRolesService.allowRole(this.role).pipe(
+          toArray(),
+          flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
+          tap((allowedIds) => {
+            expect(allowedIds[this.role.id]).to.be.true;
+          }),
+        ).subscribe(() => done(), (error) => done(error));
+      });
+    });
+
+    context('when the role is marked as joinable', function () {
+      beforeEach(function (done) {
+        let allowedIds = {};
+        allowedIds[this.role.id] = true;
+
+        this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
+          .subscribe(() => done(), (error) => done(error));
+      });
+
+      it('throws a UserRoleError', function (done) {
+        this.UserRolesService.allowRole(this.role).pipe(
+          toArray(),
+          catchError((error) => {
+            expect(error).to.an.instanceOf(UserRoleError);
+            expect(error.message).to.equal(`Users can already join ${this.role.name}.`);
+            return EMPTY;
+          }),
+        ).subscribe(
+          () => done(new Error("Expected an error to be thrown")),
+          error => done(error),
+          () => done(),
+        );
+      });
     });
   });
 
   describe('#removeRole', function () {
-    it('marks the role as not joinable', function (done) {
-      this.UserRolesService.removeRole(this.role).pipe(
-        toArray(),
-        flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
-        tap((allowedIds) => {
-          expect(allowedIds[this.role.id]).to.be.false;
-        }),
-      ).subscribe(() => done(), (error) => done(error));
+    context('when the role is marked as joinable', function () {
+      beforeEach(function (done) {
+        let allowedIds = {};
+        allowedIds[this.role.id] = true;
+
+        this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
+          .subscribe(() => done(), (error) => done(error));
+      });
+
+      it('marks the role as not joinable', function (done) {
+        this.UserRolesService.removeRole(this.role).pipe(
+          toArray(),
+          flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
+          tap((allowedIds) => {
+            expect(allowedIds[this.role.id]).to.be.false;
+          }),
+        ).subscribe(() => done(), (error) => done(error));
+      });
+    });
+
+    context('when the role is not marked as joinable', function () {
+      it('throws a UserRoleError', function (done) {
+        this.UserRolesService.removeRole(this.role).pipe(
+          toArray(),
+          catchError((error) => {
+            expect(error).to.an.instanceOf(UserRoleError);
+            expect(error.message).to.equal(`Users could not join ${this.role.name}.`);
+            return EMPTY;
+          }),
+        ).subscribe(
+          () => done(new Error("Expected an error to be thrown")),
+          error => done(error),
+          () => done(),
+        );
+      });
     });
   });
 
@@ -60,7 +114,7 @@ describe('Service: UserRolesService', function () {
     });
 
     context('when the role is not joinable', function () {
-      it('throws a JoinableRoleError', function (done) {
+      it('throws a NonJoinableRoleError', function (done) {
         this.UserRolesService.addUserToRole(this.member, this.role).pipe(
           toArray(),
           catchError((error) => {

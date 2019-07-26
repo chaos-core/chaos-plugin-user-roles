@@ -10,7 +10,7 @@ class UserRolesService extends Service {
     return of('').pipe(
       flatMap(() => this._getAllowedRoleIds(role.guild)),
       flatMap((allowedIds) => (
-        allowedIds[role.id] === true
+        allowedIds[role.id]
           ? throwError(new UserRoleError(`Users can already join ${role.name}.`))
           : of(allowedIds)
       )),
@@ -23,8 +23,8 @@ class UserRolesService extends Service {
     return of('').pipe(
       flatMap(() => this._getAllowedRoleIds(role.guild)),
       flatMap((allowedIds) => (
-        allowedIds[role.id] === false
-          ? throwError(new UserRoleError(`Users can't join ${role.name}.`))
+        !allowedIds[role.id]
+          ? throwError(new UserRoleError(`Users could not join ${role.name}.`))
           : of(allowedIds)
       )),
       tap((allowedIds) => allowedIds[role.id] = false),

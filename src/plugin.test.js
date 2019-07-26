@@ -38,6 +38,7 @@ describe('Plugin: UserRoles', function () {
 
     [
       "addRole",
+      "removeRole",
     ].forEach((configAction) => {
       it(`Adds config action ${configAction} to the bot`, function () {
         expect(this.chaos.getConfigAction('UserRoles', configAction)).not.to.be.undefined;
