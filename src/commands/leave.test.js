@@ -1,57 +1,19 @@
-const {toArray, tap} = require('rxjs/operators');
-const {CommandContext, Response} = require('chaos-core');
-const {Collection, SnowflakeUtil} = require('discord.js');
+const {tap} = require('rxjs/operators');
+const {SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
 describe('LeaveCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.command = this.chaos.getCommand('leave');
+    this.test$ = this.chaos.testCommand({
+      pluginName: 'UserRoles',
+      commandName: 'leave',
+    });
 
-    this.guild = {
-      id: SnowflakeUtil.generate(),
-      roles: new Collection(),
-    };
-
-    this.member = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      roles: new Collection(),
-      addRole: function (role) {
-        this.roles.set(role.id, role);
-        return Promise.resolve(this);
-      },
-      removeRole: function (role) {
-        this.roles.delete(role.id);
-        return Promise.resolve(this);
-      },
-    };
-
-    this.channel = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      send: message => Promise.resolve({
-        id: SnowflakeUtil.generate(),
-        content: message,
-      }),
-    };
-
-    this.message = {
-      id: SnowflakeUtil.generate(),
-      guild: this.guild,
-      member: this.member,
-      channel: this.channel,
-    };
-
-    this.context = new CommandContext(
-      this.message,
-      this.command,
-    );
-
-    this.response = new Response(
-      this.message,
-    );
+    this.guild = this.test$.message.guild;
+    this.member = this.test$.message.member;
+    this.channel = this.test$.message.channel;
   });
 
   describe('!leave {role}', function () {
@@ -64,7 +26,7 @@ describe('LeaveCommand', function () {
       this.guild.roles.set(this.role.id, this.role);
       this.member.roles.set(this.role.id, this.role);
 
-      this.context.args.role = this.role.name;
+      this.test$.args.role = this.role.name;
     });
 
     context('when the role is joinable', function () {
@@ -76,26 +38,20 @@ describe('LeaveCommand', function () {
       });
 
       it('removes the role from the user', function (done) {
-        sinon.spy(this.context.member, 'removeRole');
+        sinon.spy(this.member, 'removeRole');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
-          tap(() => {
-            expect(this.context.member.removeRole).to.have.been.calledWith(this.role);
-          }),
+        this.test$.pipe(
+          tap(() => expect(this.member.removeRole).to.have.been.calledWith(this.role)),
         ).subscribe(() => done(), error => done(error));
       });
 
       it('sends a success message', function (done) {
-        sinon.spy(this.response, 'send');
+        sinon.spy(this.channel, 'send');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
-          tap(() => {
-            expect(this.response.send).to.have.been.calledWith({
-              content: "You have been removed from the role test.",
-            });
-          }),
+        this.test$.pipe(
+          tap(() => expect(this.channel.send).to.have.been.calledWith(
+            "You have been removed from the role test.",
+          )),
         ).subscribe(() => done(), error => done(error));
       });
 
@@ -105,15 +61,12 @@ describe('LeaveCommand', function () {
         });
 
         it('sends a error message', function (done) {
-          sinon.spy(this.response, 'send');
+          sinon.spy(this.channel, 'send');
 
-          this.command.run(this.context, this.response).pipe(
-            toArray(),
-            tap(() => {
-              expect(this.response.send).to.have.been.calledWith({
-                content: "The role 'test' could not be found",
-              });
-            }),
+          this.test$.pipe(
+            tap(() => expect(this.channel.send).to.have.been.calledWith(
+              "The role 'test' could not be found",
+            )),
           ).subscribe(() => done(), error => done(error));
         });
       });
@@ -124,15 +77,12 @@ describe('LeaveCommand', function () {
         });
 
         it('sends a error message', function (done) {
-          sinon.spy(this.response, 'send');
+          sinon.spy(this.channel, 'send');
 
-          this.command.run(this.context, this.response).pipe(
-            toArray(),
-            tap(() => {
-              expect(this.response.send).to.have.been.calledWith({
-                content: "You have not joined test.",
-              });
-            }),
+          this.test$.pipe(
+            tap(() => expect(this.channel.send).to.have.been.calledWith(
+              "You have not joined test.",
+            )),
           ).subscribe(() => done(), error => done(error));
         });
       });
@@ -140,26 +90,20 @@ describe('LeaveCommand', function () {
 
     context('when the role is not joinable', function () {
       it('does not add the role to the user', function (done) {
-        sinon.spy(this.context.member, 'addRole');
+        sinon.spy(this.member, 'addRole');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
-          tap(() => {
-            expect(this.context.member.addRole).not.to.have.been.called;
-          }),
+        this.test$.pipe(
+          tap(() => expect(this.member.addRole).not.to.have.been.called),
         ).subscribe(() => done(), error => done(error));
       });
 
       it('sends a error message', function (done) {
-        sinon.spy(this.response, 'send');
+        sinon.spy(this.channel, 'send');
 
-        this.command.run(this.context, this.response).pipe(
-          toArray(),
-          tap(() => {
-            expect(this.response.send).to.have.been.calledWith({
-              content: "test can not be joined.",
-            });
-          }),
+        this.test$.pipe(
+          tap(() => expect(this.channel.send).to.have.been.calledWith(
+            "test can not be joined.",
+          )),
         ).subscribe(() => done(), error => done(error));
       });
     });
