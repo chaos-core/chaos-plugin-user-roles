@@ -36,7 +36,7 @@ describe('Command: RolesCommand', function () {
 
         this.test$.pipe(
           tap(() => expect(this.channel.send).to.have.been.calledWith(
-            "No roles to join were found",
+            "No roles to join were found.",
           )),
         ).subscribe(() => done(), error => done(error));
       });

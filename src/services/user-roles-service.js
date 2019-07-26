@@ -3,7 +3,7 @@ const {flatMap, tap, map, mapTo, filter, toArray} = require('rxjs/operators');
 const {Service} = require("chaos-core");
 
 const DataKeys = require("../lib/data-keys");
-const {LeaveRoleError, JoinRoleError, UserRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
+const UserRoleError = require('../lib/user-role-error');
 
 class UserRolesService extends Service {
   allowRole(role) {
@@ -36,11 +36,11 @@ class UserRolesService extends Service {
     return of('').pipe(
       flatMap(() => this.isRoleAllowed(role)),
       flatMap(allowed => !allowed
-        ? throwError(new NonJoinableRoleError(`${role.name} can not be joined.`))
+        ? throwError(new UserRoleError(`${role.name} can not be joined.`))
         : of(''),
       ),
       flatMap(() => member.roles.has(role.id)
-        ? throwError(new JoinRoleError(`You have already joined ${role.name}.`))
+        ? throwError(new UserRoleError(`You have already joined ${role.name}.`))
         : of(''),
       ),
       flatMap(() => member.addRole(role)),
@@ -52,11 +52,11 @@ class UserRolesService extends Service {
     return of('').pipe(
       flatMap(() => this.isRoleAllowed(role)),
       flatMap(allowed => !allowed
-        ? throwError(new NonJoinableRoleError(`${role.name} can not be joined.`))
+        ? throwError(new UserRoleError(`${role.name} can not be joined.`))
         : of(''),
       ),
       flatMap(() => !member.roles.has(role.id)
-        ? throwError(new LeaveRoleError(`You have not joined ${role.name}.`))
+        ? throwError(new UserRoleError(`You have not joined ${role.name}.`))
         : of(''),
       ),
       flatMap(() => member.removeRole(role)),
@@ -82,7 +82,7 @@ class UserRolesService extends Service {
       filter(Boolean),
       toArray(),
       flatMap(roles => roles.length === 0
-        ? throwError(new NoUserRolesError("No joinable roles were found."))
+        ? throwError(new UserRoleError("No roles to join were found."))
         : of(roles),
       ),
     );

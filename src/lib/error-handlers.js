@@ -3,7 +3,7 @@ const {throwError} = require('rxjs');
 const {catchError} = require('rxjs/operators');
 const {DiscordAPIError} = require('discord.js');
 
-const {UserRoleError, NoUserRolesError} = require("./errors");
+const UserRoleError = require('./user-role-error');
 
 function isInstanceOf(error, type) {
   return error instanceof type;
@@ -39,11 +39,7 @@ function catchDiscordApiError(context, response) {
 function catchJoinableRoleError(context, response) {
   return (source) => source.pipe(
     catchError((error) => {
-      if (error instanceof NoUserRolesError) {
-        return response.send({
-          content: "No roles to join were found",
-        });
-      } else if (error instanceof UserRoleError) {
+      if (error instanceof UserRoleError) {
         return response.send({
           content: error.message,
         });

@@ -4,7 +4,7 @@ const {Collection, SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 const DataKeys = require("../lib/data-keys");
-const {UserRoleError, LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
+const UserRoleError = require('../lib/user-role-error');
 
 describe('Service: UserRolesService', function () {
   beforeEach(function () {
@@ -118,7 +118,7 @@ describe('Service: UserRolesService', function () {
         this.UserRolesService.addUserToRole(this.member, this.role).pipe(
           toArray(),
           catchError((error) => {
-            expect(error).to.an.instanceOf(NonJoinableRoleError);
+            expect(error).to.an.instanceOf(UserRoleError);
             expect(error.message).to.equal("test can not be joined.");
             return EMPTY;
           }),
@@ -166,7 +166,7 @@ describe('Service: UserRolesService', function () {
           this.UserRolesService.addUserToRole(this.member, this.role).pipe(
             toArray(),
             catchError((error) => {
-              expect(error).to.be.an.instanceOf(JoinRoleError);
+              expect(error).to.be.an.instanceOf(UserRoleError);
               expect(error.message).to.equal('You have already joined test.');
               return EMPTY;
             }),
@@ -210,7 +210,7 @@ describe('Service: UserRolesService', function () {
         this.UserRolesService.removeUserFromRole(this.member, this.role).pipe(
           toArray(),
           catchError((error) => {
-            expect(error).to.be.an.instanceOf(NonJoinableRoleError);
+            expect(error).to.be.an.instanceOf(UserRoleError);
             expect(error.message).to.equal("test can not be joined.");
             return EMPTY;
           }),
@@ -246,7 +246,7 @@ describe('Service: UserRolesService', function () {
           this.UserRolesService.removeUserFromRole(this.member, this.role).pipe(
             toArray(),
             catchError((error) => {
-              expect(error).to.be.an.instanceOf(LeaveRoleError);
+              expect(error).to.be.an.instanceOf(UserRoleError);
               expect(error.message).to.equal('You have not joined test.');
               return EMPTY;
             }),
@@ -294,8 +294,8 @@ describe('Service: UserRolesService', function () {
       it('throws a NoUserRolesError', function (done) {
         this.UserRolesService.getAllowedRoles(this.guild).pipe(
           catchError((error) => {
-            expect(error).to.be.an.instanceOf(NoUserRolesError);
-            expect(error.message).to.be.equal("No joinable roles were found.");
+            expect(error).to.be.an.instanceOf(UserRoleError);
+            expect(error.message).to.be.equal("No roles to join were found.");
             return EMPTY;
           }),
           flatMap(() => throwError(new Error("Expected an error to be thrown"))),
@@ -364,8 +364,8 @@ describe('Service: UserRolesService', function () {
       it('throws a NoUserRolesError', function (done) {
         this.UserRolesService.getJoinedMemberRoles(this.member).pipe(
           catchError((error) => {
-            expect(error).to.be.an.instanceOf(NoUserRolesError);
-            expect(error.message).to.be.equal("No joinable roles were found.");
+            expect(error).to.be.an.instanceOf(UserRoleError);
+            expect(error.message).to.be.equal("No roles to join were found.");
             return EMPTY;
           }),
           flatMap(() => throwError(new Error("Expected an error to be thrown"))),
@@ -438,8 +438,8 @@ describe('Service: UserRolesService', function () {
       it('throws a NoUserRolesError', function (done) {
         this.UserRolesService.getAvailableMemberRoles(this.member).pipe(
           catchError((error) => {
-            expect(error).to.be.an.instanceOf(NoUserRolesError);
-            expect(error.message).to.be.equal("No joinable roles were found.");
+            expect(error).to.be.an.instanceOf(UserRoleError);
+            expect(error.message).to.be.equal("No roles to join were found.");
             return EMPTY;
           }),
           flatMap(() => throwError(new Error("Expected an error to be thrown"))),

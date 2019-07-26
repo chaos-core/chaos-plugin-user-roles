@@ -1,5 +1,5 @@
 const ChaosCore = require("chaos-core");
-const {UserRoleError} = require("../lib/errors");
+const UserRoleError = require('../lib/user-role-error');
 const {of, throwError} = require("rxjs");
 const {flatMap, map, mapTo, catchError} = require("rxjs/operators");
 
