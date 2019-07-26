@@ -1,4 +1,5 @@
 const ChaosCore = require("chaos-core");
+const {UserRoleError} = require("../lib/errors");
 const {of, throwError} = require("rxjs");
 const {flatMap, map, mapTo, catchError} = require("rxjs/operators");
 
@@ -28,10 +29,12 @@ class AddRoleAction extends ChaosCore.ConfigAction {
         content: `Users can now join ${role.name}`,
       })),
       catchError((error) => {
-        if (error instanceof ChaosCore.errors.RoleNotFoundError) {
-          return of({status: 400, content: error.message});
-        } else {
-          return throwError(error);
+        switch (true) {
+          case error instanceof ChaosCore.errors.RoleNotFoundError:
+          case error instanceof UserRoleError:
+            return of({status: 400, content: error.message});
+          default:
+            return throwError(error);
         }
       }),
     );

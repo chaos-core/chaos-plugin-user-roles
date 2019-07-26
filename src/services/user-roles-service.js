@@ -3,12 +3,17 @@ const {flatMap, tap, map, mapTo, filter, toArray} = require('rxjs/operators');
 const {Service} = require("chaos-core");
 
 const DataKeys = require("../lib/data-keys");
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
+const {LeaveRoleError, JoinRoleError, UserRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
 
 class UserRolesService extends Service {
   allowRole(role) {
     return of('').pipe(
       flatMap(() => this._getAllowedRoleIds(role.guild)),
+      flatMap((allowedIds) => (
+        allowedIds[role.id] === true
+          ? throwError(new UserRoleError(`Users can already join ${role.name}.`))
+          : of(allowedIds)
+      )),
       tap((allowedIds) => allowedIds[role.id] = true),
       flatMap((allowedIds) => this._setAllowedRoleIds(role.guild, allowedIds)),
     );
@@ -17,6 +22,11 @@ class UserRolesService extends Service {
   removeRole(role) {
     return of('').pipe(
       flatMap(() => this._getAllowedRoleIds(role.guild)),
+      flatMap((allowedIds) => (
+        allowedIds[role.id] === false
+          ? throwError(new UserRoleError(`Users can't join ${role.name}.`))
+          : of(allowedIds)
+      )),
       tap((allowedIds) => allowedIds[role.id] = false),
       flatMap((allowedIds) => this._setAllowedRoleIds(role.guild, allowedIds)),
     );

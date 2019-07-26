@@ -58,22 +58,41 @@ describe('Config: AddRoleAction', function () {
             this.test$.message.guild.roles.set(this.role.id, this.role);
           });
 
-          it('gives a success message', function (done) {
-            this.test$.pipe(
-              tap((response) => expect(response).to.containSubset({
-                status: 200,
-                content: `Users can now join ${roleName}`,
-              })),
-            ).subscribe(() => done(), (error) => done(error));
+          context('when the role has not been added', function () {
+            it('gives a success message', function (done) {
+              this.test$.pipe(
+                tap((response) => expect(response).to.containSubset({
+                  status: 200,
+                  content: `Users can now join ${roleName}`,
+                })),
+              ).subscribe(() => done(), (error) => done(error));
+            });
+
+            it('marks the role as joinable', function (done) {
+              const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
+              sinon.spy(UserRolesService, 'allowRole');
+
+              this.test$.pipe(
+                tap(() => expect(UserRolesService.allowRole).to.have.been.calledWith(this.role)),
+              ).subscribe(() => done(), (error) => done(error));
+            });
           });
 
-          it('marks the role as joinable', function (done) {
-            this.UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
-            sinon.spy(this.UserRolesService, 'allowRole');
+          context('when the role has already been added', function () {
+            beforeEach(function (done) {
+              const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
+              UserRolesService.allowRole(this.role)
+                .subscribe(() => done(), (error) => done(error));
+            });
 
-            this.test$.pipe(
-              tap(() => expect(this.UserRolesService.allowRole).to.have.been.calledWith(this.role)),
-            ).subscribe(() => done(), (error) => done(error));
+            it('gives a user friendly message', function (done) {
+              this.test$.pipe(
+                tap((response) => expect(response).to.containSubset({
+                  status: 400,
+                  content: `Users can already join ${roleName}.`,
+                })),
+              ).subscribe(() => done(), (error) => done(error));
+            });
           });
         });
       });
