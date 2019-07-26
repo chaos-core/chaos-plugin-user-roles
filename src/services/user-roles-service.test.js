@@ -6,7 +6,7 @@ const createChaosBot = require('../../test/create-chaos-bot');
 const DataKeys = require("../lib/data-keys");
 const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
 
-describe('UserRolesService', function () {
+describe('Service: UserRolesService', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
     this.UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');

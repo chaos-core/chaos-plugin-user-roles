@@ -4,7 +4,7 @@ const {SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
-describe('RolesCommand', function () {
+describe('Command: RolesCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
 

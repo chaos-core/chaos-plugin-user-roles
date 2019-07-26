@@ -3,7 +3,7 @@ const {SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
-describe('LeaveCommand', function () {
+describe('Command: LeaveCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
     this.test$ = this.chaos.testCommand({
