@@ -74,7 +74,7 @@ describe('Command: RolesCommand', function () {
                 fields: [
                   {
                     name: "Available:",
-                    value: "`role-0`, `role-1`, `role-2`, `role-3`, `role-4`, `role-5`",
+                    value: "role-0, role-1, role-2, role-3, role-4, role-5",
                   },
                 ],
               },
@@ -105,11 +105,11 @@ describe('Command: RolesCommand', function () {
                   fields: [
                     {
                       name: "Available:",
-                      value: "`role-0`, `role-1`, `role-2`",
+                      value: "role-0, role-1, role-2",
                     },
                     {
                       name: "Joined:",
-                      value: "`role-3`, `role-4`, `role-5`",
+                      value: "role-3, role-4, role-5",
                     },
                   ],
                 },
@@ -144,7 +144,7 @@ describe('Command: RolesCommand', function () {
                     },
                     {
                       name: "Joined:",
-                      value: "`role-0`, `role-1`, `role-2`, `role-3`, `role-4`, `role-5`",
+                      value: "role-0, role-1, role-2, role-3, role-4, role-5",
                     },
                   ],
                 },

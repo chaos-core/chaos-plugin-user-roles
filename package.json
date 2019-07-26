@@ -23,14 +23,15 @@
   },
   "homepage": "https://github.com/chaos-core/chaos-plugin-user-roles#readme",
   "peerDependencies": {
-    "chaos-core": "^4.0.4-dev",
+    "chaos-core": "^4.0.5-dev",
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
-    "chaos-core": "^4.0.4-dev",
+    "chaos-core": "^4.0.5-dev",
     "chaos-data-memory": "^4.0.0-dev",
+    "chaos-data-disk": "^4.0.0-dev",
     "discord.js": "^11.5.1",
     "eslint": "^6.1.0",
     "eslint-plugin-chai-expect": "^2.0.1",

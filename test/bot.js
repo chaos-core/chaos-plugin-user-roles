@@ -1,9 +1,12 @@
 const ChaosCore = require('chaos-core');
 const Path = require('path');
 
+const {from} = require('rxjs');
+const {flatMap} = require('rxjs/operators');
+
 const localConfig = require('../config');
 
-new ChaosCore({
+const chaos = new ChaosCore({
   dataSource: {
     type: "disk",
     dataDir: Path.join(__dirname, '../data'),
@@ -14,4 +17,14 @@ new ChaosCore({
   ],
 
   ...localConfig,
-}).listen();
+});
+
+chaos.on('chaos.listen', () => {
+  const PluginService = chaos.getService('core', 'PluginService');
+
+  return from(chaos.discord.guilds.array()).pipe(
+    flatMap((guild) => PluginService.enablePlugin(guild.id, 'UserRoles')),
+  );
+});
+
+chaos.listen();
