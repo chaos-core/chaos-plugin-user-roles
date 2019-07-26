@@ -1,6 +1,6 @@
 const ChaosCore = require('chaos-core');
 
-describe('Plugin: joinableRoles', function () {
+describe('Plugin: UserRoles', function () {
   context('when added to a ChaosBot', function () {
     beforeEach(function () {
       this.chaos = ChaosCore.test.createChaosStub({
@@ -24,15 +24,15 @@ describe('Plugin: joinableRoles', function () {
 
     it('Adds the plugin to the bot', function () {
       expect(this.chaos.pluginManager.plugins.map(c => c.name)).to.containSubset([
-        "joinableRoles",
+        "UserRoles",
       ]);
     });
 
     [
-      "JoinRolesService",
+      "UserRolesService",
     ].forEach((service) => {
       it(`Adds service ${service} to the bot`, function () {
-        expect(this.chaos.getService('joinableRoles', service)).not.to.be.undefined;
+        expect(this.chaos.getService('UserRoles', service)).not.to.be.undefined;
       });
     });
 

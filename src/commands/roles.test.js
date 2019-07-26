@@ -10,7 +10,7 @@ describe('RolesCommand', function () {
     this.chaos = createChaosBot();
     this.command = this.chaos.getCommand('roles');
 
-    this.joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    this.UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
     this.guild = {
       id: SnowflakeUtil.generate(),
@@ -88,7 +88,7 @@ describe('RolesCommand', function () {
           })),
           tap(role => this.roles.push(role)),
           tap(role => this.guild.roles.set(role.id, role)),
-          flatMap(role => this.joinRolesService.allowRole(role)),
+          flatMap(role => this.UserRolesService.allowRole(role)),
           toArray(),
         ).subscribe(() => done(), error => done(error));
       });

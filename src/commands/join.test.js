@@ -7,7 +7,7 @@ describe('JoinCommand', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
     this.test$ = this.chaos.testCommand({
-      pluginName: 'joinableRoles',
+      pluginName: 'UserRoles',
       commandName: 'join',
     });
 
@@ -28,9 +28,9 @@ describe('JoinCommand', function () {
 
     context('when the role is joinable', function () {
       beforeEach(function (done) {
-        const joinableRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+        const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
-        joinableRolesService.allowRole(this.role)
+        UserRolesService.allowRole(this.role)
           .subscribe(() => done(), (error) => done(error));
       });
 

@@ -21,13 +21,13 @@ class LeaveCommand extends Command {
   }
 
   run(context, response) {
-    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
     const roleService = this.chaos.getService('core', 'RoleService');
     const roleString = context.args.role;
 
     return of('').pipe(
       flatMap(() => roleService.findRole(context.guild, roleString)),
-      flatMap(role => joinRolesService.removeUserFromRole(context.member, role).pipe(
+      flatMap(role => UserRolesService.removeUserFromRole(context.member, role).pipe(
         flatMap(() => response.send({
           content: `You have been removed from the role ${role.name}.`,
         })),

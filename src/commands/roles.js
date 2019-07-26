@@ -16,12 +16,12 @@ class RolesCommand extends Command {
   }
 
   run(context, response) {
-    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
     return of('').pipe(
       flatMap(() => concat(
-        joinRolesService.getAvailableMemberRoles(context.member),
-        joinRolesService.getJoinedMemberRoles(context.member),
+        UserRolesService.getAvailableMemberRoles(context.member),
+        UserRolesService.getJoinedMemberRoles(context.member),
       )),
       map(roles => roles.map(r => `\`${r.name}\``).join(', ')),
       toArray(),

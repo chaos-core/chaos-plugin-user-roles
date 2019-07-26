@@ -1,9 +1,9 @@
 module.exports = {
-  name: "joinableRoles",
+  name: "UserRoles",
   description: "Allows users to add themselves to roles",
 
   services: [
-    require('./services/join-roles-service'),
+    require('./services/user-roles-service'),
   ],
 
   commands: [

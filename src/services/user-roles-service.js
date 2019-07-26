@@ -3,9 +3,9 @@ const {flatMap, tap, map, mapTo, filter, toArray} = require('rxjs/operators');
 const {Service} = require("chaos-core");
 
 const DataKeys = require("../lib/data-keys");
-const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoJoinableRolesError} = require("../lib/errors");
+const {LeaveRoleError, JoinRoleError, NonJoinableRoleError, NoUserRolesError} = require("../lib/errors");
 
-class JoinRolesService extends Service {
+class UserRolesService extends Service {
   allowRole(role) {
     return of('').pipe(
       flatMap(() => this._getAllowedRoleIds(role.guild)),
@@ -72,7 +72,7 @@ class JoinRolesService extends Service {
       filter(Boolean),
       toArray(),
       flatMap(roles => roles.length === 0
-        ? throwError(new NoJoinableRolesError("No joinable roles were found."))
+        ? throwError(new NoUserRolesError("No joinable roles were found."))
         : of(roles),
       ),
     );
@@ -105,11 +105,11 @@ class JoinRolesService extends Service {
     );
   }
 
-  _setAllowedRoleIds(guild, joinableRoles) {
+  _setAllowedRoleIds(guild, UserRoles) {
     return of('').pipe(
-      flatMap(() => this.chaos.setGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS, joinableRoles)),
+      flatMap(() => this.chaos.setGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS, UserRoles)),
     );
   }
 }
 
-module.exports = JoinRolesService;
+module.exports = UserRolesService;

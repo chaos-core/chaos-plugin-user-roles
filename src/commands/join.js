@@ -21,13 +21,13 @@ class JoinCommand extends Command {
   }
 
   run(context, response) {
-    const joinRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+    const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
     const roleService = this.chaos.getService('core', 'RoleService');
     const roleString = context.args.role;
 
     return of('').pipe(
       flatMap(() => roleService.findRole(context.guild, roleString)),
-      flatMap(role => joinRolesService.addUserToRole(context.member, role).pipe(
+      flatMap(role => UserRolesService.addUserToRole(context.member, role).pipe(
         flatMap(() => response.send({
           content: `You have been added to the role ${role.name}.`,
         })),

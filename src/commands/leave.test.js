@@ -69,9 +69,9 @@ describe('LeaveCommand', function () {
 
     context('when the role is joinable', function () {
       beforeEach(function (done) {
-        const joinableRolesService = this.chaos.getService('joinableRoles', 'JoinRolesService');
+        const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
-        joinableRolesService.allowRole(this.role)
+        UserRolesService.allowRole(this.role)
           .subscribe(() => done(), (error) => done(error));
       });
 

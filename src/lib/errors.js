@@ -12,10 +12,10 @@ class NonJoinableRoleError extends JoinableRoleError {
   }
 }
 
-class NoJoinableRolesError extends JoinableRoleError {
+class NoUserRolesError extends JoinableRoleError {
   constructor(message) {
     super(message);
-    this.name = "NoJoinableRolesError";
+    this.name = "NoUserRolesError";
   }
 }
 
@@ -36,7 +36,7 @@ class LeaveRoleError extends JoinableRoleError {
 module.exports = {
   JoinableRoleError,
   NonJoinableRoleError,
-  NoJoinableRolesError,
+  NoUserRolesError,
   JoinRoleError,
   LeaveRoleError,
 };
