@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/chaos-plugin-joinable-roles.iml" filepath="$PROJECT_DIR$/.idea/chaos-plugin-joinable-roles.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/chaos-plugin-user-roles.iml" filepath="$PROJECT_DIR$/.idea/chaos-plugin-user-roles.iml" />
     </modules>
   </component>
 </project>

@@ -7,10 +7,12 @@ class AddRoleAction extends ChaosCore.ConfigAction {
   constructor(chaos) {
     super(chaos, {
       name: "addRole",
+      description: "Adds a role to the list of joinable roles.",
+
       args: [
         {
           name: "role",
-          description: "The name of the role to add. Can be by mention, name, or id",
+          description: "The name of the role to add. Can be by mention, name, or id.",
           required: true,
         },
       ],
