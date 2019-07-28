@@ -1,5 +1,5 @@
 const {zip} = require('rxjs');
-const {flatMap, map, toArray} = require('rxjs/operators');
+const {flatMap, map} = require('rxjs/operators');
 const {Command} = require("chaos-core");
 const {RichEmbed} = require("discord.js");
 
@@ -16,7 +16,7 @@ class RolesCommand extends Command {
   }
 
   run(context, response) {
-    const CommandService = this.chaos.getService('core', 'CommandService')
+    const CommandService = this.chaos.getService('core', 'CommandService');
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
     return zip(

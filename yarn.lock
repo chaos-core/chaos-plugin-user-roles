@@ -310,22 +310,22 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.2:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-chaos-core@^4.0.5-dev:
-  version "4.0.5-dev"
-  resolved "https://registry.yarnpkg.com/chaos-core/-/chaos-core-4.0.5-dev.tgz#b023a3cdbe319a170fba689f13227f18842e8831"
-  integrity sha512-mn7ohkoWk7KFRdQZ6Vtso1AE26fYRI/tLhkx5TiGntw24uVZG4RKw71tXDLXqAz4RYidmlFdyrVcbagNAox9RA==
+chaos-core@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/chaos-core/-/chaos-core-4.0.6.tgz#76b4ad63fe1f6c0b60f4c041ea0f9570c9f5f365"
+  integrity sha512-irtJ9L3zpaT4sbAjO/my+DRt9jUHtVg60/IvTri3tVw/9uLxN899eJpemBEFMZT9n1TYByDMJOZ2Bsrf6enWKA==
   dependencies:
     winston "^3.2.1"
 
-chaos-data-disk@^4.0.0-dev:
-  version "4.0.0-dev"
-  resolved "https://registry.yarnpkg.com/chaos-data-disk/-/chaos-data-disk-4.0.0-dev.tgz#0566444cc2feb2a68ec9e431d677a8ab999ef6d9"
-  integrity sha512-ZkB7jsMYseEPT8FqgamE7/MZl7jBHvF4lhAKgbUsUKbKd7nCdDVshjkkWkjw/zhLTJiAx+yWmz6HoKsbrsRuZQ==
+chaos-data-disk@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/chaos-data-disk/-/chaos-data-disk-4.0.1.tgz#d9f541330106a4c829817b242e935285b3ca2c01"
+  integrity sha512-r4pHouIdtdupFLAdDqyES11kTQiD2SsUYxuPYIxw0pvTwMn2sbrIjCq4snWG47JQ5N3BLJSJLhORLL1ja88RsA==
 
-chaos-data-memory@^4.0.0-dev:
-  version "4.0.0-dev"
-  resolved "https://registry.yarnpkg.com/chaos-data-memory/-/chaos-data-memory-4.0.0-dev.tgz#91905f325bae7bfaf59c08c72b02ee7652629a9f"
-  integrity sha512-nAw2yjfjlE4GaHRzFyFsvQgLU7Pv1VwnVOxGd2Lg+klzxjpZsYd5SsnYLDMlGqKQc7ggeuiHCk6fknkpwdpb9A==
+chaos-data-memory@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/chaos-data-memory/-/chaos-data-memory-4.0.1.tgz#63cf805ba163571ea5ecd84ea66cb83df737e231"
+  integrity sha512-MQ4r4Lb6CelQEZwRet7HRJ5QTL3VH4ofHsXSRTIqa1xly+Z2O3TP9XwPaIpiYUFj0Cpksnwsu7jrS6nQfYEIOQ==
 
 chardet@^0.7.0:
   version "0.7.0"
