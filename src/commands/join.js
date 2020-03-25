@@ -15,6 +15,7 @@ class JoinCommand extends Command {
       args: [{
         name: "role",
         description: "the name of the role to join",
+        greedy: true,
         required: true,
       }],
     });

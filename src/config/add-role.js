@@ -13,6 +13,7 @@ class AddRoleAction extends ChaosCore.ConfigAction {
         {
           name: "role",
           description: "The name of the role to add. Can be by mention, name, or id.",
+          greedy: true,
           required: true,
         },
       ],

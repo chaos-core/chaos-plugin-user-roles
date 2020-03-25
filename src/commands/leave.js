@@ -15,6 +15,7 @@ class LeaveCommand extends Command {
       args: [{
         name: "role",
         description: "the name of the role to leave",
+        greedy: true,
         required: true,
       }],
     });
