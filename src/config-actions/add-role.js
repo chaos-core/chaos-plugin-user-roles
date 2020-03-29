@@ -6,13 +6,14 @@ const {flatMap, map, mapTo, catchError} = require("rxjs/operators");
 class AddRoleAction extends ChaosCore.ConfigAction {
   constructor(chaos) {
     super(chaos, {
-      name: "removeRole",
-      description: "Removes a role from the list of joinable roles.",
+      name: "addRole",
+      description: "Adds a role to the list of joinable roles.",
 
       args: [
         {
           name: "role",
-          description: "The name of the role to remove. Can be by mention, name, or id.",
+          description: "The name of the role to add. Can be by mention, name, or id.",
+          greedy: true,
           required: true,
         },
       ],
@@ -22,13 +23,17 @@ class AddRoleAction extends ChaosCore.ConfigAction {
     this.UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
   }
 
+  get strings() {
+    return super.strings.userRoles.configActions.addRole;
+  }
+
   run(context) {
     return of('').pipe(
       flatMap(() => this.RoleService.findRole(context.guild, context.args.role)),
-      flatMap((role) => this.UserRolesService.removeRole(role).pipe(mapTo(role))),
+      flatMap((role) => this.UserRolesService.allowRole(role).pipe(mapTo(role))),
       map((role) => ({
         status: 200,
-        content: `Users can no longer join ${role.name}`,
+        content: `Users can now join ${role.name}`,
       })),
       catchError((error) => {
         switch (true) {

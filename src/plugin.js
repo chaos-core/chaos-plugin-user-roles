@@ -7,8 +7,8 @@ module.exports = {
   ],
 
   configActions: [
-    require('./config/add-role'),
-    require('./config/remove-role'),
+    require('./config-actions/add-role'),
+    require('./config-actions/remove-role'),
   ],
 
   commands: [
@@ -16,4 +16,6 @@ module.exports = {
     require('./commands/leave'),
     require('./commands/roles'),
   ],
+
+  strings: require('./plugin.strings'),
 };

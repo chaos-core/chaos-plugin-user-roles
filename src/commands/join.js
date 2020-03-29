@@ -21,6 +21,10 @@ class JoinCommand extends Command {
     });
   }
 
+  get strings() {
+    return super.strings.userRoles.commands.join;
+  }
+
   run(context, response) {
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
     const roleService = this.chaos.getService('core', 'RoleService');

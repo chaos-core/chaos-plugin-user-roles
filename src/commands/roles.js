@@ -15,6 +15,10 @@ class RolesCommand extends Command {
     });
   }
 
+  get strings() {
+    return super.strings.userRoles.commands.roles;
+  }
+
   run(context, response) {
     const CommandService = this.chaos.getService('core', 'CommandService');
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
