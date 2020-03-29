@@ -21,6 +21,10 @@ class LeaveCommand extends Command {
     });
   }
 
+  get strings() {
+    return super.strings.userRoles.commands.leave;
+  }
+
   run(context, response) {
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
     const roleService = this.chaos.getService('core', 'RoleService');
@@ -30,7 +34,7 @@ class LeaveCommand extends Command {
       flatMap(() => roleService.findRole(context.guild, roleString)),
       flatMap(role => UserRolesService.removeUserFromRole(context.member, role).pipe(
         flatMap(() => response.send({
-          content: `You have been removed from the role ${role.name}.`,
+          content: this.strings.removedFromRole({roleName: role.name}),
         })),
       )),
       catchDiscordApiError(context, response),

@@ -2,14 +2,18 @@
 
 Adds support for joinable roles to ChaosCore discord bots
 
+- [Strings](#strings)
 - Commands
     - [join](#join)
     - [leave](#leave)
     - [roles](#roles)
 - Config Actions
-    - [addRole](#addRole)
-    - [removeRole](#removeRole)
+    - [addRole](#addrole)
+    - [removeRole](#removerole)
 
+## Strings
+
+For overridable strings, see [plugin.strings.js](./src/plugin.strings.js) 
 
 ## Commands
 
