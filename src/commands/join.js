@@ -34,7 +34,7 @@ class JoinCommand extends Command {
       flatMap(() => roleService.findRole(context.guild, roleString)),
       flatMap(role => UserRolesService.addUserToRole(context.member, role).pipe(
         flatMap(() => response.send({
-          content: `You have been added to the role ${role.name}.`,
+          content: this.strings.addedToRole({roleName: role.name}),
         })),
       )),
       catchDiscordApiError(context, response),

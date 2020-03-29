@@ -33,19 +33,28 @@ class RolesCommand extends Command {
         embed.setFooter(`${commandPrefix}join {role}`);
 
         if (availableRoles.length > 0) {
-          embed.addField("Available:", availableRoles.map((r) => r.name).join(', '));
+          embed.addField(
+            this.strings.embedHeaders.available(),
+            availableRoles.map((r) => r.name).join(', '),
+          );
         } else {
-          embed.addField("Available:", "You've joined all the roles!");
+          embed.addField(
+            this.strings.embedHeaders.available(),
+            this.strings.allRolesJoined(),
+          );
         }
 
         if (joinedRoles.length > 0) {
-          embed.addField("Joined:", joinedRoles.map((r) => r.name).join(', '));
+          embed.addField(
+            this.strings.embedHeaders.joined(),
+            joinedRoles.map((r) => r.name).join(', '),
+          );
         }
 
         return embed;
       }),
       flatMap(embed => response.send({
-        content: "Here are the roles you can join:",
+        content: this.strings.availableToJoin(),
         embed,
       })),
       catchDiscordApiError(context, response),

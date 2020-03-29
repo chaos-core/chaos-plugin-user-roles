@@ -33,7 +33,7 @@ class AddRoleAction extends ChaosCore.ConfigAction {
       flatMap((role) => this.UserRolesService.allowRole(role).pipe(mapTo(role))),
       map((role) => ({
         status: 200,
-        content: `Users can now join ${role.name}`,
+        content: this.strings.roleAdded({roleName: role.name}),
       })),
       catchError((error) => {
         switch (true) {

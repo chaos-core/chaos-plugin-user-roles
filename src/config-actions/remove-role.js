@@ -32,7 +32,7 @@ class AddRoleAction extends ChaosCore.ConfigAction {
       flatMap((role) => this.UserRolesService.removeRole(role).pipe(mapTo(role))),
       map((role) => ({
         status: 200,
-        content: `Users can no longer join ${role.name}`,
+        content: this.strings.roleRemoved({roleName: role.name}),
       })),
       catchError((error) => {
         switch (true) {

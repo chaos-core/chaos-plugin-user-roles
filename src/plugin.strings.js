@@ -1,13 +1,36 @@
 module.exports = {
   userRoles: {
     commands: {
-      join: require('./commands/join.strings'),
-      leave: require('./commands/leave.strings'),
-      roles: require('./commands/roles.strings'),
+      join: {
+        addedToRole: ({roleName}) =>
+          `You have been added to the role ${roleName}.`,
+      },
+      leave: {
+        removedFromRole: ({roleName}) =>
+          `You have been removed from the role ${roleName}.`,
+      },
+      roles: {
+        availableToJoin: () =>
+          `Here are the roles you can join:`,
+        allRolesJoined: () =>
+          `You've joined all the roles!`,
+        embedHeaders: {
+          available: () =>
+            `Available:`,
+          joined: () =>
+            `Joined:`,
+        },
+      },
     },
     configActions: {
-      addRole: require('./config-actions/add-role.strings'),
-      removeRole: require('./config-actions/remove-role.strings'),
+      addRole: {
+        roleAdded: ({roleName}) =>
+          `Users can now join ${roleName}`,
+      },
+      removeRole: {
+        roleRemoved: ({roleName}) =>
+          `Users can no longer join ${roleName}`,
+      },
     },
   },
 };
