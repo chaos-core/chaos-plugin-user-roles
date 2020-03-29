@@ -310,22 +310,23 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.2:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-chaos-core@^4.0.6:
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/chaos-core/-/chaos-core-4.0.6.tgz#76b4ad63fe1f6c0b60f4c041ea0f9570c9f5f365"
-  integrity sha512-irtJ9L3zpaT4sbAjO/my+DRt9jUHtVg60/IvTri3tVw/9uLxN899eJpemBEFMZT9n1TYByDMJOZ2Bsrf6enWKA==
+chaos-core@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/chaos-core/-/chaos-core-4.2.0.tgz#9869e07c8c7d001c5431a23dc76cb761577a04c6"
+  integrity sha512-QD9mychtPh2cog2hkWXBWij2pg2CFZjRMO99WPe1VRdGUuQw1NyafyREDOLxug6u9JLUj+flJS/VRwmmWhA3iw==
   dependencies:
+    deepmerge "^4.2.2"
     winston "^3.2.1"
 
-chaos-data-disk@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/chaos-data-disk/-/chaos-data-disk-4.0.1.tgz#d9f541330106a4c829817b242e935285b3ca2c01"
-  integrity sha512-r4pHouIdtdupFLAdDqyES11kTQiD2SsUYxuPYIxw0pvTwMn2sbrIjCq4snWG47JQ5N3BLJSJLhORLL1ja88RsA==
+chaos-data-disk@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/chaos-data-disk/-/chaos-data-disk-4.2.0.tgz#3e8e608cff2c9cdb25d62f90fffd69a071fdefc0"
+  integrity sha512-o6O3BDtKKe68z/gC47yQltNYfvzG1w7zTTK4mOPmrxvUykk7zI5yOMvHrUvYkaG6FRX+XDF+2yOR/PZ+2nGbGA==
 
-chaos-data-memory@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/chaos-data-memory/-/chaos-data-memory-4.0.1.tgz#63cf805ba163571ea5ecd84ea66cb83df737e231"
-  integrity sha512-MQ4r4Lb6CelQEZwRet7HRJ5QTL3VH4ofHsXSRTIqa1xly+Z2O3TP9XwPaIpiYUFj0Cpksnwsu7jrS6nQfYEIOQ==
+chaos-data-memory@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/chaos-data-memory/-/chaos-data-memory-4.2.0.tgz#ebc195728599d9993e8af83ccb249b946714a0b8"
+  integrity sha512-pEekBwns/edM8Pu+KXPSOPbGniLmEMBMNFEv2SgrZ/aepAK6fm8wVIsbZkljX115IW3Md3J8RrNZTzyCCxVo5Q==
 
 chardet@^0.7.0:
   version "0.7.0"
@@ -544,6 +545,11 @@ deep-is@~0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
   integrity sha1-s2nW+128E+7PUk+RsHD+7cNXzzQ=
+
+deepmerge@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.2.2.tgz#44d2ea3679b8f4d4ffba33f03d865fc1e7bf4955"
+  integrity sha512-FJ3UgI4gIl+PHZm53knsuSFpE+nESMr7M4v9QcgB7S63Kj/6WqMiFQJpBBYz1Pt+66bZpP3Q7Lye0Oo9MPKEdg==
 
 define-properties@^1.1.2:
   version "1.1.3"

@@ -1,6 +1,6 @@
 {
   "name": "chaos-plugin-user-roles",
-  "version": "1.0.2",
+  "version": "4.2.0",
   "description": "Adds joinable role support to ChaosCore bots",
   "main": "src/plugin.js",
   "author": "Stephen A. Wilson",
@@ -23,15 +23,15 @@
   },
   "homepage": "https://github.com/chaos-core/chaos-plugin-user-roles#readme",
   "peerDependencies": {
-    "chaos-core": "^4.0.6",
+    "chaos-core": "^4.2.0",
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
-    "chaos-core": "^4.0.6",
-    "chaos-data-memory": "^4.0.1",
-    "chaos-data-disk": "^4.0.1",
+    "chaos-core": "^4.2.0",
+    "chaos-data-memory": "^4.2.0",
+    "chaos-data-disk": "^4.2.0",
     "discord.js": "^11.5.1",
     "eslint": "^6.1.0",
     "eslint-plugin-chai-expect": "^2.0.1",
