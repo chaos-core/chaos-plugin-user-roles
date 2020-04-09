@@ -1,6 +1,6 @@
 {
   "name": "chaos-plugin-user-roles",
-  "version": "4.3.0-dev",
+  "version": "4.3.1",
   "description": "Adds joinable role support to ChaosCore bots",
   "main": "src/plugin.js",
   "author": "Stephen A. Wilson",
