@@ -1,6 +1,5 @@
-const {of, from, EMPTY, zip, range, throwError} = require('rxjs');
-const {flatMap, tap, toArray, catchError, map, first, takeLast, mapTo} = require('rxjs/operators');
 const {Collection, SnowflakeUtil} = require('discord.js');
+const {range} = require('range');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 const DataKeys = require("../lib/data-keys");
@@ -9,7 +8,7 @@ const UserRoleError = require('../lib/user-role-error');
 describe('Service: UserRolesService', function () {
   beforeEach(function () {
     this.chaos = createChaosBot();
-    this.UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
+    this.userRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
     this.guild = {
       id: SnowflakeUtil.generate(),
@@ -25,78 +24,64 @@ describe('Service: UserRolesService', function () {
 
   describe('#allowRole', function () {
     context('when the role is not marked as joinable', function () {
-      it('marks the role as joinable', function (done) {
-        this.UserRolesService.allowRole(this.role).pipe(
-          toArray(),
-          flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
-          tap((allowedIds) => {
-            expect(allowedIds[this.role.id]).to.be.true;
-          }),
-        ).subscribe(() => done(), (error) => done(error));
+      it('marks the role as joinable', async function () {
+        await this.userRolesService.allowRole(this.role).toPromise();
+        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS).toPromise();
+        expect(allowedIds[this.role.id]).to.be.true;
       });
     });
 
     context('when the role is marked as joinable', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         let allowedIds = {};
         allowedIds[this.role.id] = true;
 
-        this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
-          .subscribe(() => done(), (error) => done(error));
+        await this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
+          .toPromise();
       });
 
-      it('throws a UserRoleError', function (done) {
-        this.UserRolesService.allowRole(this.role).pipe(
-          toArray(),
-          catchError((error) => {
-            expect(error).to.an.instanceOf(UserRoleError);
-            expect(error.message).to.equal(`Users can already join ${this.role.name}.`);
-            return EMPTY;
-          }),
-        ).subscribe(
-          () => done(new Error("Expected an error to be thrown")),
-          error => done(error),
-          () => done(),
-        );
+      it('throws a UserRoleError', async function () {
+        try {
+          await this.userRolesService.allowRole(this.role).toPromise();
+        } catch (error) {
+          expect(error).to.an.instanceOf(UserRoleError);
+          expect(error.message).to.equal(`Users can already join ${this.role.name}.`);
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
   });
 
   describe('#removeRole', function () {
     context('when the role is marked as joinable', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         let allowedIds = {};
         allowedIds[this.role.id] = true;
 
-        this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
-          .subscribe(() => done(), (error) => done(error));
+        await this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
+          .toPromise();
       });
 
-      it('marks the role as not joinable', function (done) {
-        this.UserRolesService.removeRole(this.role).pipe(
-          toArray(),
-          flatMap(() => this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS)),
-          tap((allowedIds) => {
-            expect(allowedIds[this.role.id]).to.be.false;
-          }),
-        ).subscribe(() => done(), (error) => done(error));
+      it('marks the role as not joinable', async function () {
+        await this.userRolesService.removeRole(this.role).toPromise();
+        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS).toPromise();
+        expect(allowedIds[this.role.id]).to.be.false;
       });
     });
 
     context('when the role is not marked as joinable', function () {
-      it('throws a UserRoleError', function (done) {
-        this.UserRolesService.removeRole(this.role).pipe(
-          toArray(),
-          catchError((error) => {
-            expect(error).to.an.instanceOf(UserRoleError);
-            expect(error.message).to.equal(`Users could not join ${this.role.name}.`);
-            return EMPTY;
-          }),
-        ).subscribe(
-          () => done(new Error("Expected an error to be thrown")),
-          error => done(error),
-          () => done(),
-        );
+      it('throws a UserRoleError', async function () {
+        try {
+          await this.userRolesService.removeRole(this.role).toPromise();
+        } catch (error) {
+          expect(error).to.an.instanceOf(UserRoleError);
+          expect(error.message).to.equal(`Users could not join ${this.role.name}.`);
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
   });
@@ -114,77 +99,63 @@ describe('Service: UserRolesService', function () {
     });
 
     context('when the role is not joinable', function () {
-      it('throws a NonJoinableRoleError', function (done) {
-        this.UserRolesService.addUserToRole(this.member, this.role).pipe(
-          toArray(),
-          catchError((error) => {
-            expect(error).to.an.instanceOf(UserRoleError);
-            expect(error.message).to.equal("test can not be joined.");
-            return EMPTY;
-          }),
-        ).subscribe(
-          () => done(new Error("Expected an error to be thrown")),
-          error => done(error),
-          () => done(),
-        );
+      it('throws a NonJoinableRoleError', async function () {
+        try {
+          await this.userRolesService.addUserToRole(this.member, this.role).toPromise();
+        } catch (error) {
+          expect(error).to.an.instanceOf(UserRoleError);
+          expect(error.message).to.equal("test can not be joined.");
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
 
-      it('does not add the role to the user', function (done) {
+      it('does not add the role to the user', async function () {
         sinon.spy(this.member, 'addRole');
+        await this.userRolesService.addUserToRole(this.member, this.role).toPromise()
+          .catch(() => ''); //Ignore expected error
 
-        this.UserRolesService.addUserToRole(this.member, this.role).pipe(
-          toArray(),
-          catchError(() => of('')), //silence expected error
-          tap(() => expect(this.member.addRole).not.to.have.been.called),
-        ).subscribe(() => done(), error => done(error));
+        expect(this.member.addRole).not.to.have.been.called;
       });
     });
 
     context('when the role is joinable', function () {
-      beforeEach(function (done) {
-        this.UserRolesService.allowRole(this.role)
-          .subscribe(() => done(), error => done(error));
+      beforeEach(async function () {
+        await this.userRolesService.allowRole(this.role)
+          .toPromise();
       });
 
-      it('adds the role to the user', function (done) {
+      it('adds the role to the user', async function () {
         sinon.spy(this.member, 'addRole');
 
-        this.UserRolesService.addUserToRole(this.member, this.role).pipe(
-          toArray(),
-          tap(() => expect(this.member.addRole).to.have.been.calledWith(this.role)),
-        ).subscribe(() => done(), error => done(error));
+        await this.userRolesService.addUserToRole(this.member, this.role).toPromise();
+        expect(this.member.addRole).to.have.been.calledWith(this.role);
       });
 
       context('when the user already has the role', function () {
-        beforeEach(function (done) {
-          this.member.addRole(this.role)
-            .then(() => done())
-            .catch(error => done(error));
+        beforeEach(async function () {
+          await this.member.addRole(this.role);
         });
 
-        it('throws a JoinableRoleError', function (done) {
-          this.UserRolesService.addUserToRole(this.member, this.role).pipe(
-            toArray(),
-            catchError((error) => {
-              expect(error).to.be.an.instanceOf(UserRoleError);
-              expect(error.message).to.equal('You have already joined test.');
-              return EMPTY;
-            }),
-          ).subscribe(
-            () => done(new Error("Expected an error to be thrown")),
-            error => done(error),
-            () => done(),
-          );
+        it('throws a JoinableRoleError', async function () {
+          try {
+            await this.userRolesService.addUserToRole(this.member, this.role).toPromise();
+          } catch (error) {
+            expect(error).to.be.an.instanceOf(UserRoleError);
+            expect(error.message).to.equal('You have already joined test.');
+            return;
+          }
+
+          throw new Error("Expected an error to be thrown");
         });
 
-        it('does not add the role to the user', function (done) {
+        it('does not add the role to the user', async function () {
           sinon.spy(this.member, 'addRole');
 
-          this.UserRolesService.addUserToRole(this.member, this.role).pipe(
-            toArray(),
-            catchError(() => of('')), //silence expected error
-            tap(() => expect(this.member.addRole).not.to.have.been.called),
-          ).subscribe(() => done(), error => done(error));
+          await this.userRolesService.addUserToRole(this.member, this.role).toPromise()
+            .catch(() => ''); //silence expected error
+          expect(this.member.addRole).not.to.have.been.called;
         });
       });
     });
@@ -206,35 +177,30 @@ describe('Service: UserRolesService', function () {
     });
 
     context('when the role is not joinable', function () {
-      it('throws a JoinableRoleError', function (done) {
-        this.UserRolesService.removeUserFromRole(this.member, this.role).pipe(
-          toArray(),
-          catchError((error) => {
-            expect(error).to.be.an.instanceOf(UserRoleError);
-            expect(error.message).to.equal("test can not be joined.");
-            return EMPTY;
-          }),
-        ).subscribe(
-          () => done(new Error("Expected an error to be thrown")),
-          error => done(error),
-          () => done(),
-        );
+      it('throws a JoinableRoleError', async function () {
+        try {
+          await this.userRolesService.removeUserFromRole(this.member, this.role).toPromise();
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(UserRoleError);
+          expect(error.message).to.equal("test can not be joined.");
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
 
     context('when the role is joinable', function () {
-      beforeEach(function (done) {
-        this.UserRolesService.allowRole(this.role)
-          .subscribe(() => done(), error => done(error));
+      beforeEach(async function () {
+        await this.userRolesService.allowRole(this.role)
+          .toPromise();
       });
 
-      it('removes the role from the user', function (done) {
+      it('removes the role from the user', async function () {
         sinon.spy(this.member, 'removeRole');
 
-        this.UserRolesService.removeUserFromRole(this.member, this.role).pipe(
-          toArray(),
-          tap(() => expect(this.member.removeRole).to.have.been.calledWith(this.role)),
-        ).subscribe(() => done(), error => done(error));
+        await this.userRolesService.removeUserFromRole(this.member, this.role).toPromise();
+        expect(this.member.removeRole).to.have.been.calledWith(this.role);
       });
 
       context('when the user does not have the role', function () {
@@ -242,19 +208,16 @@ describe('Service: UserRolesService', function () {
           this.member.roles.delete(this.role.id);
         });
 
-        it('throws a JoinableRoleError', function (done) {
-          this.UserRolesService.removeUserFromRole(this.member, this.role).pipe(
-            toArray(),
-            catchError((error) => {
-              expect(error).to.be.an.instanceOf(UserRoleError);
-              expect(error.message).to.equal('You have not joined test.');
-              return EMPTY;
-            }),
-          ).subscribe(
-            () => done(new Error("Expected an error to be thrown")),
-            error => done(error),
-            () => done(),
-          );
+        it('throws a JoinableRoleError', async function () {
+          try {
+            await this.userRolesService.removeUserFromRole(this.member, this.role).toPromise();
+          } catch (error) {
+            expect(error).to.be.an.instanceOf(UserRoleError);
+            expect(error.message).to.equal('You have not joined test.');
+            return;
+          }
+
+          throw new Error("Expected an error to be thrown");
         });
       });
     });
@@ -262,51 +225,43 @@ describe('Service: UserRolesService', function () {
 
   describe('#isRoleAllowed', function () {
     context('when the role is joinable in the server', function () {
-      beforeEach(function (done) {
-        this.UserRolesService.allowRole(this.role)
-          .subscribe(() => done(), error => done(error));
+      beforeEach(async function () {
+        await this.userRolesService.allowRole(this.role)
+          .toPromise();
       });
 
-      it('emits true', function (done) {
-        this.UserRolesService.isRoleAllowed(this.role).pipe(
-          toArray(),
-          tap((emitted) => {
-            expect(emitted).to.deep.equal([true]);
-          }),
-        ).subscribe(() => done(), (error) => done(error));
+      it('returns true', async function () {
+        const result = await this.userRolesService.isRoleAllowed(this.role).toPromise();
+        expect(result).to.be.true;
       });
     });
 
     context('when the role is not joinable in the server', function () {
-      it('emits false', function (done) {
-        this.UserRolesService.isRoleAllowed(this.role).pipe(
-          toArray(),
-          tap((emitted) => {
-            expect(emitted).to.deep.equal([false]);
-          }),
-        ).subscribe(() => done(), (error) => done(error));
+      it('emits false', async function () {
+        const result = await this.userRolesService.isRoleAllowed(this.role).toPromise();
+        expect(result).to.be.false;
       });
     });
   });
 
   describe('#getAllowedRoles', function () {
     context('when there are no joinable roles', function () {
-      it('throws a NoUserRolesError', function (done) {
-        this.UserRolesService.getAllowedRoles(this.guild).pipe(
-          catchError((error) => {
-            expect(error).to.be.an.instanceOf(UserRoleError);
-            expect(error.message).to.be.equal("No roles to join were found.");
-            return EMPTY;
-          }),
-          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
-          toArray(),
-        ).subscribe(() => done(), error => done(error));
+      it('throws a NoUserRolesError', async function () {
+        try {
+          await this.userRolesService.getAllowedRoles(this.guild).toPromise();
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(UserRoleError);
+          expect(error.message).to.be.equal("No roles to join were found.");
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
 
     context('when there are joinable roles', function () {
-      beforeEach(function (done) {
-        this.UserRoles = [
+      beforeEach(async function () {
+        this.userRoles = [
           'joinable-1',
           'joinable-2',
           'joinable-3',
@@ -326,28 +281,21 @@ describe('Service: UserRolesService', function () {
           guild: this.guild,
         }));
 
-        zip(
-          from(this.UserRoles).pipe(
-            tap(role => this.guild.roles.set(role.id, role)),
-            flatMap(role => this.UserRolesService.allowRole(role)),
-            toArray(),
-          ),
-          from(this.nonUserRoles).pipe(
-            tap(role => this.guild.roles.set(role.id, role)),
-            toArray(),
-          ),
-        ).subscribe(() => done(), error => done(error));
+        for (let role of this.userRoles) {
+          this.guild.roles.set(role.id, role);
+          await this.userRolesService.allowRole(role).toPromise();
+        }
+
+        for (let role of this.nonUserRoles) {
+          this.guild.roles.set(role.id, role);
+        }
       });
 
-      it('emits all joinable roles', function (done) {
-        this.UserRolesService.getAllowedRoles(this.guild).pipe(
-          first(),
-          tap(roles => {
-            expect(roles.map(r => r.name)).to.deep.equal(
-              this.UserRoles.map(r => r.name),
-            );
-          }),
-        ).subscribe(() => done(), error => done(error));
+      it('emits all joinable roles', async function () {
+        const roles = await this.userRolesService.getAllowedRoles(this.guild).toPromise();
+        expect(roles.map(r => r.name)).to.deep.equal(
+          this.userRoles.map(r => r.name),
+        );
       });
     });
   });
@@ -361,66 +309,57 @@ describe('Service: UserRolesService', function () {
     });
 
     context('when there are no joinable roles', function () {
-      it('throws a NoUserRolesError', function (done) {
-        this.UserRolesService.getJoinedMemberRoles(this.member).pipe(
-          catchError((error) => {
-            expect(error).to.be.an.instanceOf(UserRoleError);
-            expect(error.message).to.be.equal("No roles to join were found.");
-            return EMPTY;
-          }),
-          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
-          toArray(),
-        ).subscribe(() => done(), error => done(error));
+      it('throws a NoUserRolesError', async function () {
+        try {
+          await this.userRolesService.getJoinedMemberRoles(this.member).toPromise();
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(UserRoleError);
+          expect(error.message).to.be.equal("No roles to join were found.");
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
 
     context('when there are joinable roles', function () {
-      beforeEach(function (done) {
-        range(0, 6).pipe(
-          map(roleNum => ({
+      beforeEach(async function () {
+        this.roles = range(0, 6)
+          .map(roleNum => ({
             id: SnowflakeUtil.generate(),
             name: `role-${roleNum}`,
             guild: this.guild,
-          })),
-          tap(role => this.guild.roles.set(role.id, role)),
-          flatMap(role => this.UserRolesService.allowRole(role).pipe(
-            mapTo(role),
-          )),
-          toArray(),
-          tap(roles => this.roles = roles),
-        ).subscribe(() => done(), error => done(error));
+          }));
+
+        for (const role of this.roles) {
+          this.guild.roles.set(role.id, role);
+          await this.userRolesService.allowRole(role).toPromise();
+        }
       });
 
       context('when the user has not joined any roles', function () {
-        it('emits an empty array', function (done) {
-          this.UserRolesService.getJoinedMemberRoles(this.member).pipe(
-            first(),
-            tap((emitted) => {
-              expect(emitted).to.deep.equal([]);
-            }),
-          ).subscribe(() => done(), error => done(error));
+        it('returns an empty array', async function () {
+          const roles = await this.userRolesService.getJoinedMemberRoles(this.member).toPromise();
+          expect(roles).to.deep.equal([]);
         });
       });
 
       context('when the user has joined some roles', function () {
-        beforeEach(function (done) {
-          from(this.roles).pipe(
-            takeLast(3),
-            tap(role => this.member.roles.set(role.id, role)),
-            toArray(),
-            tap(roles => this.joinedRoles = roles),
-          ).subscribe(() => done(), error => done(error));
+        beforeEach(function () {
+          this.joinedRoles = [
+            this.roles[3],
+            this.roles[4],
+            this.roles[5],
+          ];
+
+          this.joinedRoles.forEach(role => this.member.roles.set(role.id, role));
         });
 
-        it('emits the roles the user has joined', function (done) {
-          this.UserRolesService.getJoinedMemberRoles(this.member).pipe(
-            first(),
-            tap((roles) => {
-              expect(roles.map(r => r.name)).to.deep.equal(
-                this.joinedRoles.map(r => r.name),
-              );
-            }),
-          ).subscribe(() => done(), error => done(error));
+        it('emits the roles the user has joined', async function () {
+          const roles = await this.userRolesService.getJoinedMemberRoles(this.member).toPromise();
+          expect(roles.map(r => r.name)).to.deep.equal(
+            this.joinedRoles.map(r => r.name),
+          );
         });
       });
     });
@@ -435,65 +374,57 @@ describe('Service: UserRolesService', function () {
     });
 
     context('when there are no joinable roles', function () {
-      it('throws a NoUserRolesError', function (done) {
-        this.UserRolesService.getAvailableMemberRoles(this.member).pipe(
-          catchError((error) => {
-            expect(error).to.be.an.instanceOf(UserRoleError);
-            expect(error.message).to.be.equal("No roles to join were found.");
-            return EMPTY;
-          }),
-          flatMap(() => throwError(new Error("Expected an error to be thrown"))),
-          toArray(),
-        ).subscribe(() => done(), error => done(error));
+      it('throws a NoUserRolesError', async function () {
+        try {
+          await this.userRolesService.getAvailableMemberRoles(this.member).toPromise();
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(UserRoleError);
+          expect(error.message).to.be.equal("No roles to join were found.");
+          return;
+        }
+
+        throw new Error("Expected an error to be thrown");
       });
     });
 
     context('when there are joinable roles', function () {
-      beforeEach(function (done) {
-        this.roles = [];
-
-        range(0, 6).pipe(
-          map(roleNum => ({
+      beforeEach(async function () {
+        this.roles = range(0, 6)
+          .map(roleNum => ({
             id: SnowflakeUtil.generate(),
             name: `role-${roleNum}`,
             guild: this.guild,
-          })),
-          tap(role => this.roles.push(role)),
-          tap(role => this.guild.roles.set(role.id, role)),
-          flatMap(role => this.UserRolesService.allowRole(role)),
-          toArray(),
-        ).subscribe(() => done(), error => done(error));
+          }));
+
+        for (const role of this.roles) {
+          this.guild.roles.set(role.id, role);
+          await this.userRolesService.allowRole(role).toPromise();
+        }
       });
 
-      it('emits all joinable roles', function (done) {
-        this.UserRolesService.getAvailableMemberRoles(this.member).pipe(
-          first(),
-          tap((emitted) => {
-            expect(emitted.map(r => r.name)).to.deep.equal([
-              "role-0", "role-1", "role-2", "role-3", "role-4", "role-5",
-            ]);
-          }),
-        ).subscribe(() => done(), error => done(error));
+      it('emits all joinable roles', async function () {
+        const roles = await this.userRolesService.getAvailableMemberRoles(this.member).toPromise();
+        expect(roles.map(r => r.name)).to.deep.equal([
+          "role-0", "role-1", "role-2", "role-3", "role-4", "role-5",
+        ]);
       });
 
       context('when the user has joined some roles', function () {
-        beforeEach(function (done) {
-          from(this.roles).pipe(
-            takeLast(3),
-            tap(role => this.member.roles.set(role.id, role)),
-            toArray(),
-          ).subscribe(() => done(), error => done(error));
+        beforeEach(function () {
+          this.joinedRoles = [
+            this.roles[3],
+            this.roles[4],
+            this.roles[5],
+          ];
+
+          this.joinedRoles.forEach(role => this.member.roles.set(role.id, role));
         });
 
-        it('emits the roles the user has not joined', function (done) {
-          this.UserRolesService.getAvailableMemberRoles(this.member).pipe(
-            first(),
-            tap((emitted) => {
-              expect(emitted.map(r => r.name)).to.deep.equal([
-                "role-0", "role-1", "role-2",
-              ]);
-            }),
-          ).subscribe(() => done(), error => done(error));
+        it('emits the roles the user has not joined', async function () {
+          const roles = await this.userRolesService.getAvailableMemberRoles(this.member).toPromise();
+          expect(roles.map(r => r.name)).to.deep.equal([
+            "role-0", "role-1", "role-2",
+          ]);
         });
       });
     });

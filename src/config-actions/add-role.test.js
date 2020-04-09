@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const {tap} = require('rxjs/operators');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
@@ -13,12 +12,11 @@ describe('Config: AddRoleAction', function () {
   });
 
   context('when a role is not given', function () {
-    it('gives a help message', function (done) {
-      this.test$.pipe(
-        tap((response) => expect(response).to.containSubset({
-          content: "I'm sorry, but I'm missing some information for that command:",
-        })),
-      ).subscribe(() => done(), (error) => done(error));
+    it('gives a help message', async function () {
+      const response = await this.test$.toPromise();
+      expect(response).to.containSubset({
+        content: "I'm sorry, but I'm missing some information for that command:",
+      });
     });
   });
 
@@ -37,13 +35,12 @@ describe('Config: AddRoleAction', function () {
       });
 
       context('when the role can not be found', function () {
-        it('gives a user friendly error', function (done) {
-          this.test$.pipe(
-            tap((response) => expect(response).to.containSubset({
-              status: 400,
-              content: `The role '${roleString}' could not be found`,
-            })),
-          ).subscribe(() => done(), (error) => done(error));
+        it('gives a user friendly error', async function () {
+          const response = await this.test$.toPromise();
+          expect(response).to.containSubset({
+            status: 400,
+            content: `The role '${roleString}' could not be found`,
+          });
         });
       });
 
@@ -59,39 +56,36 @@ describe('Config: AddRoleAction', function () {
           });
 
           context('when the role has not been added', function () {
-            it('gives a success message', function (done) {
-              this.test$.pipe(
-                tap((response) => expect(response).to.containSubset({
-                  status: 200,
-                  content: `Users can now join ${roleName}`,
-                })),
-              ).subscribe(() => done(), (error) => done(error));
+            it('gives a success message', async function () {
+              const response = await this.test$.toPromise();
+              expect(response).to.containSubset({
+                status: 200,
+                content: `Users can now join ${roleName}`,
+              });
             });
 
-            it('marks the role as joinable', function (done) {
+            it('marks the role as joinable', async function () {
               const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
               sinon.spy(UserRolesService, 'allowRole');
 
-              this.test$.pipe(
-                tap(() => expect(UserRolesService.allowRole).to.have.been.calledWith(this.role)),
-              ).subscribe(() => done(), (error) => done(error));
+              await this.test$.toPromise();
+              expect(UserRolesService.allowRole).to.have.been.calledWith(this.role);
             });
           });
 
           context('when the role has already been added', function () {
-            beforeEach(function (done) {
-              const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
-              UserRolesService.allowRole(this.role)
-                .subscribe(() => done(), (error) => done(error));
+            beforeEach(async function () {
+              await this.chaos.getService('UserRoles', 'UserRolesService')
+                .allowRole(this.role)
+                .toPromise();
             });
 
-            it('gives a user friendly message', function (done) {
-              this.test$.pipe(
-                tap((response) => expect(response).to.containSubset({
-                  status: 400,
-                  content: `Users can already join ${roleName}.`,
-                })),
-              ).subscribe(() => done(), (error) => done(error));
+            it('gives a user friendly message', async function () {
+              const response = await this.test$.toPromise();
+              expect(response).to.containSubset({
+                status: 400,
+                content: `Users can already join ${roleName}.`,
+              });
             });
           });
         });

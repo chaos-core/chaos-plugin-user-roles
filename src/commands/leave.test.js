@@ -1,4 +1,3 @@
-const {tap} = require('rxjs/operators');
 const {SnowflakeUtil} = require('discord.js');
 
 const createChaosBot = require('../../test/create-chaos-bot');
@@ -30,29 +29,26 @@ describe('Command: LeaveCommand', function () {
     });
 
     context('when the role is joinable', function () {
-      beforeEach(function (done) {
-        const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
-
-        UserRolesService.allowRole(this.role)
-          .subscribe(() => done(), (error) => done(error));
+      beforeEach(async function () {
+        await this.chaos.getService('UserRoles', 'UserRolesService')
+          .allowRole(this.role)
+          .toPromise();
       });
 
-      it('removes the role from the user', function (done) {
+      it('removes the role from the user', async function () {
         sinon.spy(this.member, 'removeRole');
 
-        this.test$.pipe(
-          tap(() => expect(this.member.removeRole).to.have.been.calledWith(this.role)),
-        ).subscribe(() => done(), error => done(error));
+        await this.test$.toPromise();
+        expect(this.member.removeRole).to.have.been.calledWith(this.role);
       });
 
-      it('sends a success message', function (done) {
+      it('sends a success message', async function () {
         sinon.spy(this.channel, 'send');
 
-        this.test$.pipe(
-          tap(() => expect(this.channel.send).to.have.been.calledWith(
-            "You have been removed from the role test.",
-          )),
-        ).subscribe(() => done(), error => done(error));
+        await this.test$.toPromise();
+        expect(this.channel.send).to.have.been.calledWith(
+          "You have been removed from the role test.",
+        );
       });
 
       context('when the role can not be found', function () {
@@ -60,14 +56,13 @@ describe('Command: LeaveCommand', function () {
           this.guild.roles.delete(this.role.id);
         });
 
-        it('sends a error message', function (done) {
+        it('sends a error message', async function () {
           sinon.spy(this.channel, 'send');
 
-          this.test$.pipe(
-            tap(() => expect(this.channel.send).to.have.been.calledWith(
-              "The role 'test' could not be found",
-            )),
-          ).subscribe(() => done(), error => done(error));
+          await this.test$.toPromise();
+          expect(this.channel.send).to.have.been.calledWith(
+            "The role 'test' could not be found",
+          );
         });
       });
 
@@ -76,35 +71,32 @@ describe('Command: LeaveCommand', function () {
           this.member.roles.delete(this.role.id);
         });
 
-        it('sends a error message', function (done) {
+        it('sends a error message', async function () {
           sinon.spy(this.channel, 'send');
 
-          this.test$.pipe(
-            tap(() => expect(this.channel.send).to.have.been.calledWith(
-              "You have not joined test.",
-            )),
-          ).subscribe(() => done(), error => done(error));
+          await this.test$.toPromise();
+          expect(this.channel.send).to.have.been.calledWith(
+            "You have not joined test.",
+          );
         });
       });
     });
 
     context('when the role is not joinable', function () {
-      it('does not add the role to the user', function (done) {
+      it('does not add the role to the user', async function () {
         sinon.spy(this.member, 'addRole');
 
-        this.test$.pipe(
-          tap(() => expect(this.member.addRole).not.to.have.been.called),
-        ).subscribe(() => done(), error => done(error));
+        await this.test$.toPromise();
+        expect(this.member.addRole).not.to.have.been.called;
       });
 
-      it('sends a error message', function (done) {
+      it('sends a error message', async function () {
         sinon.spy(this.channel, 'send');
 
-        this.test$.pipe(
-          tap(() => expect(this.channel.send).to.have.been.calledWith(
-            "test can not be joined.",
-          )),
-        ).subscribe(() => done(), error => done(error));
+        await this.test$.toPromise();
+        expect(this.channel.send).to.have.been.calledWith(
+          "test can not be joined.",
+        );
       });
     });
   });

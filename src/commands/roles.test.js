@@ -1,6 +1,5 @@
-const {range, from} = require('rxjs');
-const {flatMap, tap, toArray, map, takeLast} = require('rxjs/operators');
 const {SnowflakeUtil} = require('discord.js');
+const {range} = require('range');
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
@@ -31,126 +30,119 @@ describe('Command: RolesCommand', function () {
     });
 
     context('when no roles are joinable', function () {
-      it('sends an error message', function (done) {
+      it('sends an error message', async function () {
         sinon.spy(this.channel, 'send');
 
-        this.test$.pipe(
-          tap(() => expect(this.channel.send).to.have.been.calledWith(
-            "No roles to join were found.",
-          )),
-        ).subscribe(() => done(), error => done(error));
+        await this.test$.toPromise();
+        expect(this.channel.send).to.have.been.calledWith(
+          "No roles to join were found.",
+        );
       });
     });
 
     context('when there are joinable roles', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.roles = [];
 
         const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
-        range(0, 6).pipe(
-          map(roleNum => ({
-            id: SnowflakeUtil.generate(),
-            name: `role-${roleNum}`,
-            guild: this.guild,
-          })),
-          tap(role => this.roles.push(role)),
-          tap(role => this.guild.roles.set(role.id, role)),
-          flatMap(role => UserRolesService.allowRole(role)),
-          toArray(),
-        ).subscribe(() => done(), error => done(error));
+        range(0, 6)
+          .map(roleNum => {
+            let role = {
+              id: SnowflakeUtil.generate(),
+              name: `role-${roleNum}`,
+              guild: this.guild,
+            };
+            this.roles.push(role);
+            this.guild.roles.set(role.id, role);
+          });
+
+        await Promise.all(
+          this.roles.map(async (role) => UserRolesService.allowRole(role).toPromise()),
+        );
       });
 
-      it('lists all the roles that the user can join', function (done) {
+      it('lists all the roles that the user can join', async function () {
         sinon.spy(this.channel, 'send');
 
-        this.test$.pipe(
-          tap(() => expect(this.channel.send).to.have.been.calledOnce),
-          map(() => this.channel.send.getCall(0).args),
-          tap(([body, options]) => {
-            expect(body).to.eq("Here are the roles you can join:");
-            expect(options).to.containSubset({
-              embed: {
-                fields: [
-                  {
-                    name: "Available:",
-                    value: "role-0, role-1, role-2, role-3, role-4, role-5",
-                  },
-                ],
+        await this.test$.toPromise();
+        expect(this.channel.send).to.have.been.calledOnce;
+
+        const [body, options] = this.channel.send.getCall(0).args;
+        expect(body).to.eq("Here are the roles you can join:");
+        expect(options).to.containSubset({
+          embed: {
+            fields: [
+              {
+                name: "Available:",
+                value: "role-0, role-1, role-2, role-3, role-4, role-5",
               },
-            });
-          }),
-        ).subscribe(() => done(), error => done(error));
+            ],
+          },
+        });
       });
 
       context('when the user has joined some roles', function () {
-        beforeEach(function (done) {
-          from(this.roles).pipe(
-            takeLast(3),
-            tap(role => this.member.roles.set(role.id, role)),
-            toArray(),
-          ).subscribe(() => done(), error => done(error));
+        beforeEach(function () {
+          this.roles
+            .slice(Math.max(this.roles.length - 3, 0))
+            .map(role => this.member.roles.set(role.id, role));
         });
 
-        it('lists the joined roles separately', function (done) {
+        it('lists the joined roles separately', async function () {
           sinon.spy(this.channel, 'send');
 
-          this.test$.pipe(
-            tap(() => expect(this.channel.send).to.have.been.calledOnce),
-            map(() => this.channel.send.getCall(0).args),
-            tap(([body, options]) => {
-              expect(body).to.eq("Here are the roles you can join:");
-              expect(options).to.containSubset({
-                embed: {
-                  fields: [
-                    {
-                      name: "Available:",
-                      value: "role-0, role-1, role-2",
-                    },
-                    {
-                      name: "Joined:",
-                      value: "role-3, role-4, role-5",
-                    },
-                  ],
+          await this.test$.toPromise();
+          expect(this.channel.send).to.have.been.calledOnce;
+
+          const [body, options] = this.channel.send.getCall(0).args;
+          expect(body).to.eq("Here are the roles you can join:");
+          expect(options).to.containSubset({
+            embed: {
+              fields: [
+                {
+                  name: "Available:",
+                  value: "role-0, role-1, role-2",
                 },
-              });
-            }),
-          ).subscribe(() => done(), error => done(error));
+                {
+                  name: "Joined:",
+                  value: "role-3, role-4, role-5",
+                },
+              ],
+            },
+          });
         });
       });
 
       context('when the user has joined all the roles', function () {
-        beforeEach(function (done) {
-          from(this.roles).pipe(
-            tap(role => this.member.roles.set(role.id, role)),
-            toArray(),
-          ).subscribe(() => done(), error => done(error));
+        beforeEach(function () {
+          this.roles.forEach((role) => {
+            this.member.roles.set(role.id, role);
+          });
         });
 
-        it('lists the joined roles separately', function (done) {
+        it('lists the joined roles separately', async function () {
           sinon.spy(this.channel, 'send');
 
-          this.test$.pipe(
-            tap(() => expect(this.channel.send).to.have.been.calledOnce),
-            map(() => this.channel.send.getCall(0).args),
-            tap(([body, options]) => {
-              expect(body).to.eq("Here are the roles you can join:");
-              expect(options).to.containSubset({
-                embed: {
-                  fields: [
-                    {
-                      name: "Available:",
-                      value: "You've joined all the roles!",
-                    },
-                    {
-                      name: "Joined:",
-                      value: "role-0, role-1, role-2, role-3, role-4, role-5",
-                    },
-                  ],
+          await this.test$.toPromise();
+          expect(this.channel.send).to.have.been.calledOnce;
+
+          const [body, options] = this.channel.send.getCall(0).args;
+          expect(body).to.eq("Here are the roles you can join:");
+          expect(options).to.containSubset({
+            embed: {
+              fields: [
+                {
+                  name: "Available:",
+                  value: "You've joined all the roles!",
                 },
-              });
-            }),
-          ).subscribe(() => done(), error => done(error));
+                {
+                  name: "Joined:",
+                  value: "role-0, role-1, role-2, role-3, role-4, role-5",
+                },
+              ],
+            },
+          });
         });
       });
     });
