@@ -1,20 +1,17 @@
 const {SnowflakeUtil} = require('discord.js');
 const {range} = require('range');
+const {MockMessage} = require("chaos-core").test.discordMocks;
 
 const createChaosBot = require('../../test/create-chaos-bot');
 
 describe('Command: RolesCommand', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
     this.chaos = createChaosBot();
-
-    this.test$ = this.chaos.testCommand({
-      pluginName: 'UserRoles',
-      commandName: 'roles',
-    });
-
-    this.guild = this.test$.message.guild;
-    this.member = this.test$.message.member;
-    this.channel = this.test$.message.channel;
+    this.message = new MockMessage();
+    await this.chaos.listen().toPromise();
+    await this.chaos.getService('core', 'PluginService')
+      .enablePlugin(this.message.guild.id, 'UserRoles')
+      .toPromise();
   });
 
   describe('!roles', function () {
@@ -22,19 +19,17 @@ describe('Command: RolesCommand', function () {
       this.role = {
         id: SnowflakeUtil.generate(),
         name: "test",
-        guild: this.guild,
+        guild: this.message.guild,
       };
-      this.guild.roles.set(this.role.id, this.role);
-
-      this.test$.args.role = this.role.name;
+      this.message.guild.roles.set(this.role.id, this.role);
+      this.message.content = '!roles';
     });
 
     context('when no roles are joinable', function () {
       it('sends an error message', async function () {
-        sinon.spy(this.channel, 'send');
-
-        await this.test$.toPromise();
-        expect(this.channel.send).to.have.been.calledWith(
+        sinon.spy(this.message.channel, 'send');
+        await this.chaos.testMessage(this.message);
+        expect(this.message.channel.send).to.have.been.calledWith(
           "No roles to join were found.",
         );
       });
@@ -51,10 +46,10 @@ describe('Command: RolesCommand', function () {
             let role = {
               id: SnowflakeUtil.generate(),
               name: `role-${roleNum}`,
-              guild: this.guild,
+              guild: this.message.guild,
             };
             this.roles.push(role);
-            this.guild.roles.set(role.id, role);
+            this.message.guild.roles.set(role.id, role);
           });
 
         await Promise.all(
@@ -63,12 +58,11 @@ describe('Command: RolesCommand', function () {
       });
 
       it('lists all the roles that the user can join', async function () {
-        sinon.spy(this.channel, 'send');
+        sinon.spy(this.message.channel, 'send');
+        await this.chaos.testMessage(this.message);
+        expect(this.message.channel.send).to.have.been.calledOnce;
 
-        await this.test$.toPromise();
-        expect(this.channel.send).to.have.been.calledOnce;
-
-        const [body, options] = this.channel.send.getCall(0).args;
+        const [body, options] = this.message.channel.send.getCall(0).args;
         expect(body).to.eq("Here are the roles you can join:");
         expect(options).to.containSubset({
           embed: {
@@ -86,16 +80,15 @@ describe('Command: RolesCommand', function () {
         beforeEach(function () {
           this.roles
             .slice(Math.max(this.roles.length - 3, 0))
-            .map(role => this.member.roles.set(role.id, role));
+            .map(role => this.message.member.roles.set(role.id, role));
         });
 
         it('lists the joined roles separately', async function () {
-          sinon.spy(this.channel, 'send');
+          sinon.spy(this.message.channel, 'send');
+          await this.chaos.testMessage(this.message);
+          expect(this.message.channel.send).to.have.been.calledOnce;
 
-          await this.test$.toPromise();
-          expect(this.channel.send).to.have.been.calledOnce;
-
-          const [body, options] = this.channel.send.getCall(0).args;
+          const [body, options] = this.message.channel.send.getCall(0).args;
           expect(body).to.eq("Here are the roles you can join:");
           expect(options).to.containSubset({
             embed: {
@@ -117,17 +110,16 @@ describe('Command: RolesCommand', function () {
       context('when the user has joined all the roles', function () {
         beforeEach(function () {
           this.roles.forEach((role) => {
-            this.member.roles.set(role.id, role);
+            this.message.member.roles.set(role.id, role);
           });
         });
 
         it('lists the joined roles separately', async function () {
-          sinon.spy(this.channel, 'send');
+          sinon.spy(this.message.channel, 'send');
+          await this.chaos.testMessage(this.message);
+          expect(this.message.channel.send).to.have.been.calledOnce;
 
-          await this.test$.toPromise();
-          expect(this.channel.send).to.have.been.calledOnce;
-
-          const [body, options] = this.channel.send.getCall(0).args;
+          const [body, options] = this.message.channel.send.getCall(0).args;
           expect(body).to.eq("Here are the roles you can join:");
           expect(options).to.containSubset({
             embed: {
