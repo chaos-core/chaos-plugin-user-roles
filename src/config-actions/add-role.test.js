@@ -84,8 +84,7 @@ describe('Config: addRole', function () {
             context('when the role has already been added', function () {
               beforeEach(async function () {
                 await this.chaos.getService('UserRoles', 'UserRolesService')
-                  .allowRole(this.role)
-                  .toPromise();
+                  .allowRole(this.role);
               });
 
               it('gives a user friendly message', async function () {

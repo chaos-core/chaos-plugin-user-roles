@@ -6,7 +6,7 @@ function isInstanceOf(error, type) {
   return error instanceof type;
 }
 
-function handleDiscordApiError(error, response) {
+async function handleDiscordApiError(error, response) {
   if (!isInstanceOf(error, DiscordAPIError)) {
     return throwError(error);
   }
@@ -18,24 +18,24 @@ function handleDiscordApiError(error, response) {
         content:
           `Whoops, I do not have permission to update user roles. Can you ask an admin to grant me the ` +
           `"Manage Roles" permission?`,
-      });
+      }).toPromise();
     case "Privilege is too low...":
       return response.send({
         type: 'message',
         content: `I'm unable to change your roles; Your permissions outrank mine.`,
-      });
+      }).toPromise();
     default:
-      return throwError(error);
+      throw error;
   }
 }
 
-function handleChaosError(error, response) {
+async function handleChaosError(error, response) {
   if (error instanceof ChaosError) {
     return response.send({
       content: error.message,
-    });
+    }).toPromise();
   } else {
-    return throwError(error);
+    throw error;
   }
 }
 

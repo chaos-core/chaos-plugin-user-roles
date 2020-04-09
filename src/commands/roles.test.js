@@ -37,24 +37,19 @@ describe('Command: RolesCommand', function () {
 
     context('when there are joinable roles', function () {
       beforeEach(async function () {
-        this.roles = [];
-
         const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
-        range(0, 6)
-          .map(roleNum => {
-            let role = {
-              id: SnowflakeUtil.generate(),
-              name: `role-${roleNum}`,
-              guild: this.message.guild,
-            };
-            this.roles.push(role);
-            this.message.guild.roles.set(role.id, role);
-          });
+        this.roles = range(0, 6)
+          .map(roleNum => ({
+            id: SnowflakeUtil.generate(),
+            name: `role-${roleNum}`,
+            guild: this.message.guild,
+          }));
 
-        await Promise.all(
-          this.roles.map(async (role) => UserRolesService.allowRole(role).toPromise()),
-        );
+        for (const role of this.roles) {
+          this.message.guild.roles.set(role.id, role);
+          await UserRolesService.allowRole(role);
+        }
       });
 
       it('lists all the roles that the user can join', async function () {

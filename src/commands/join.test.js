@@ -27,8 +27,7 @@ describe('Command: JoinCommand', function () {
     context('when the role is joinable', function () {
       beforeEach(async function () {
         await this.chaos.getService('UserRoles', 'UserRolesService')
-          .allowRole(this.role)
-          .toPromise();
+          .allowRole(this.role);
       });
 
       it('adds the role to the user', async function () {

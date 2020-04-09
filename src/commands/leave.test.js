@@ -28,8 +28,7 @@ describe('Command: LeaveCommand', function () {
     context('when the role is joinable', function () {
       beforeEach(async function () {
         await this.chaos.getService('UserRoles', 'UserRolesService')
-          .allowRole(this.role)
-          .toPromise();
+          .allowRole(this.role);
       });
 
       it('removes the role from the user', async function () {

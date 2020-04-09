@@ -1,5 +1,3 @@
-const {zip, throwError} = require('rxjs');
-const {flatMap, catchError, map} = require('rxjs/operators');
 const {Command} = require("chaos-core");
 const {ChaosError} = require("chaos-core").errors;
 const {DiscordAPIError, RichEmbed} = require('discord.js');
@@ -18,55 +16,53 @@ class RolesCommand extends Command {
     return super.strings.userRoles.commands.roles;
   }
 
-  run(context, response) {
+  async run(context, response) {
     const CommandService = this.chaos.getService('core', 'CommandService');
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
 
-    return zip(
-      UserRolesService.getAvailableMemberRoles(context.member),
-      UserRolesService.getJoinedMemberRoles(context.member),
-      CommandService.getPrefix(context.guild.id),
-    ).pipe(
-      map(([availableRoles, joinedRoles, commandPrefix]) => {
-        const embed = new RichEmbed();
-        embed.setFooter(`${commandPrefix}join {role}`);
+    try {
+      const [availableRoles, joinedRoles, commandPrefix] = await Promise.all([
+        UserRolesService.getAvailableMemberRoles(context.member),
+        UserRolesService.getJoinedMemberRoles(context.member),
+        CommandService.getPrefix(context.guild.id),
+      ]);
 
-        if (availableRoles.length > 0) {
-          embed.addField(
-            this.strings.embedHeaders.available(),
-            availableRoles.map((r) => r.name).join(', '),
-          );
-        } else {
-          embed.addField(
-            this.strings.embedHeaders.available(),
-            this.strings.allRolesJoined(),
-          );
-        }
+      const embed = new RichEmbed();
+      embed.setFooter(`${commandPrefix}join {role}`);
 
-        if (joinedRoles.length > 0) {
-          embed.addField(
-            this.strings.embedHeaders.joined(),
-            joinedRoles.map((r) => r.name).join(', '),
-          );
-        }
+      if (availableRoles.length > 0) {
+        embed.addField(
+          this.strings.embedHeaders.available(),
+          availableRoles.map((r) => r.name).join(', '),
+        );
+      } else {
+        embed.addField(
+          this.strings.embedHeaders.available(),
+          this.strings.allRolesJoined(),
+        );
+      }
 
-        return embed;
-      }),
-      flatMap(embed => response.send({
+      if (joinedRoles.length > 0) {
+        embed.addField(
+          this.strings.embedHeaders.joined(),
+          joinedRoles.map((r) => r.name).join(', '),
+        );
+      }
+
+      await response.send({
         content: this.strings.availableToJoin(),
         embed,
-      })),
-      catchError((error) => {
-        switch (true) {
-          case error instanceof DiscordAPIError:
-            return handleDiscordApiError(error, response);
-          case error instanceof ChaosError:
-            return handleChaosError(error, response);
-          default:
-            return throwError(error);
-        }
-      }),
-    );
+      }).toPromise();
+    } catch (error) {
+      switch (true) {
+        case error instanceof DiscordAPIError:
+          return handleDiscordApiError(error, response);
+        case error instanceof ChaosError:
+          return handleChaosError(error, response);
+        default:
+          throw error;
+      }
+    }
   }
 }
 

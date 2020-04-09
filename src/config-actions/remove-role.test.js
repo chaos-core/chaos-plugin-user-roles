@@ -67,8 +67,7 @@ describe('Config: removeRole', function () {
             context('when the role has been added', function () {
               beforeEach(async function () {
                 await this.chaos.getService('UserRoles', 'UserRolesService')
-                  .allowRole(this.role)
-                  .toPromise();
+                  .allowRole(this.role);
               });
 
               it('gives a success message', async function () {
