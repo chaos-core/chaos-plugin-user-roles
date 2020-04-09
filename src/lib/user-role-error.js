@@ -1,9 +1,6 @@
-class UserRoleError extends Error {
-  constructor(message) {
-    super();
-    this.message = message;
-    this.name = "UserRoleError";
-  }
+const {ChaosError} = require('chaos-core').errors;
+
+class UserRoleError extends ChaosError {
 }
 
 module.exports = UserRoleError;

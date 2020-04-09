@@ -10,16 +10,14 @@ describe('Plugin: UserRoles', function () {
       });
     });
 
-    afterEach(function (done) {
+    afterEach(async function () {
       if (this.chaos.listening) {
-        this.chaos.shutdown().subscribe(() => done(), (error) => done(error));
-      } else {
-        done();
+        await this.chaos.shutdown().toPromise();
       }
     });
 
-    it('Allows the bot to load', function (done) {
-      this.chaos.listen().subscribe(() => done(), (error) => done(error));
+    it('Allows the bot to load', async function () {
+      await this.chaos.listen().toPromise();
     });
 
     it('Adds the plugin to the bot', function () {

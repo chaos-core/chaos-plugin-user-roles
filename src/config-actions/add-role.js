@@ -1,7 +1,4 @@
 const ChaosCore = require("chaos-core");
-const UserRoleError = require('../lib/user-role-error');
-const {of, throwError} = require("rxjs");
-const {flatMap, map, mapTo, catchError} = require("rxjs/operators");
 
 class AddRoleAction extends ChaosCore.ConfigAction {
   constructor(chaos) {
@@ -27,24 +24,22 @@ class AddRoleAction extends ChaosCore.ConfigAction {
     return super.strings.userRoles.configActions.addRole;
   }
 
-  run(context) {
-    return of('').pipe(
-      flatMap(() => this.RoleService.findRole(context.guild, context.args.role)),
-      flatMap((role) => this.UserRolesService.allowRole(role).pipe(mapTo(role))),
-      map((role) => ({
+  async run(context) {
+    try {
+      const role = await this.RoleService.findRole(context.guild, context.args.role).toPromise();
+      await this.UserRolesService.allowRole(role);
+      return {
         status: 200,
         content: this.strings.roleAdded({roleName: role.name}),
-      })),
-      catchError((error) => {
-        switch (true) {
-          case error instanceof ChaosCore.errors.RoleNotFoundError:
-          case error instanceof UserRoleError:
-            return of({status: 400, content: error.message});
-          default:
-            return throwError(error);
-        }
-      }),
-    );
+      };
+    } catch (error) {
+      switch (true) {
+        case error instanceof ChaosCore.errors.ChaosError:
+          return {status: 400, content: error.message};
+        default:
+          throw error;
+      }
+    }
   }
 }
 

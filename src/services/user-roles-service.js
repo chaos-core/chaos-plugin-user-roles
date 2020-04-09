@@ -1,124 +1,94 @@
-const {of, throwError, from} = require('rxjs');
-const {flatMap, tap, map, mapTo, filter, toArray} = require('rxjs/operators');
 const {Service} = require("chaos-core");
 
 const DataKeys = require("../lib/data-keys");
 const UserRoleError = require('../lib/user-role-error');
 
 class UserRolesService extends Service {
-  allowRole(role) {
-    return of('').pipe(
-      flatMap(() => this._getAllowedRoleIds(role.guild)),
-      flatMap((allowedIds) => (
-        allowedIds[role.id]
-          ? throwError(new UserRoleError(`Users can already join ${role.name}.`))
-          : of(allowedIds)
-      )),
-      tap((allowedIds) => allowedIds[role.id] = true),
-      flatMap((allowedIds) => this._setAllowedRoleIds(role.guild, allowedIds)),
-    );
+  async allowRole(role) {
+    const allowedIds = await this._getAllowedRoleIds(role.guild);
+
+    if (allowedIds[role.id]) {
+        throw new UserRoleError(`Users can already join ${role.name}.`);
+    }
+
+    allowedIds[role.id] = true;
+    return this._setAllowedRoleIds(role.guild, allowedIds);
   }
 
-  removeRole(role) {
-    return of('').pipe(
-      flatMap(() => this._getAllowedRoleIds(role.guild)),
-      flatMap((allowedIds) => (
-        !allowedIds[role.id]
-          ? throwError(new UserRoleError(`Users could not join ${role.name}.`))
-          : of(allowedIds)
-      )),
-      tap((allowedIds) => allowedIds[role.id] = false),
-      flatMap((allowedIds) => this._setAllowedRoleIds(role.guild, allowedIds)),
-    );
+  async removeRole(role) {
+    const allowedIds = await this._getAllowedRoleIds(role.guild);
+
+    if (!allowedIds[role.id]) {
+        throw new UserRoleError(`Users could not join ${role.name}.`);
+    }
+
+    allowedIds[role.id] = false;
+    return this._setAllowedRoleIds(role.guild, allowedIds);
   }
 
-  addUserToRole(member, role) {
-    return of('').pipe(
-      flatMap(() => this.isRoleAllowed(role)),
-      flatMap(allowed => !allowed
-        ? throwError(new UserRoleError(`${role.name} can not be joined.`))
-        : of(''),
-      ),
-      flatMap(() => member.roles.has(role.id)
-        ? throwError(new UserRoleError(`You have already joined ${role.name}.`))
-        : of(''),
-      ),
-      flatMap(() => member.addRole(role)),
-      mapTo(role),
-    );
+  async addUserToRole(member, role) {
+    const allowed = await this.isRoleAllowed(role);
+    if (!allowed) {
+      throw new UserRoleError(`${role.name} can not be joined.`);
+    }
+    if (member.roles.has(role.id)) {
+      throw new UserRoleError(`You have already joined ${role.name}.`);
+    }
+    await member.addRole(role);
   }
 
-  removeUserFromRole(member, role) {
-    return of('').pipe(
-      flatMap(() => this.isRoleAllowed(role)),
-      flatMap(allowed => !allowed
-        ? throwError(new UserRoleError(`${role.name} can not be joined.`))
-        : of(''),
-      ),
-      flatMap(() => !member.roles.has(role.id)
-        ? throwError(new UserRoleError(`You have not joined ${role.name}.`))
-        : of(''),
-      ),
-      flatMap(() => member.removeRole(role)),
-      mapTo(role),
-    );
+  async removeUserFromRole(member, role) {
+    const allowed = await this.isRoleAllowed(role);
+    if (!allowed) {
+      throw new UserRoleError(`${role.name} can not be joined.`);
+    }
+    if (!member.roles.has(role.id)) {
+      throw new UserRoleError(`You have not joined ${role.name}.`);
+    }
+    await member.removeRole(role);
   }
 
-  isRoleAllowed(role) {
-    return of('').pipe(
-      flatMap(() => this._getAllowedRoleIds(role.guild)),
-      map((allowedIds) => allowedIds[role.id]),
-      map((allowed) => typeof allowed === "undefined" ? false : allowed),
-    );
+  async isRoleAllowed(role) {
+    const allowedIds = await this._getAllowedRoleIds(role.guild);
+    const allowed = allowedIds[role.id];
+    return typeof allowed === "undefined" ? false : allowed;
   }
 
-  getAllowedRoles(guild) {
-    return of('').pipe(
-      flatMap(() => this._getAllowedRoleIds(guild)),
-      flatMap(allowedIds => from(Object.entries(allowedIds))),
-      filter(([, allowed]) => allowed),
-      map(([roleId]) => roleId),
-      map(roleId => guild.roles.get(roleId)),
-      filter(Boolean),
-      toArray(),
-      flatMap(roles => roles.length === 0
-        ? throwError(new UserRoleError("No roles to join were found."))
-        : of(roles),
-      ),
-    );
+  async getAllowedRoles(guild) {
+    const allowedIds = await this._getAllowedRoleIds(guild);
+    const roles = [];
+
+    for (const [roleId, allowed] of Object.entries(allowedIds)) {
+      const role = guild.roles.get(roleId);
+      if (role && allowed) {
+        roles.push(role);
+      }
+    }
+
+    if (roles.length === 0) {
+      throw new UserRoleError("No roles to join were found.");
+    } else {
+      return roles;
+    }
   }
 
-  getJoinedMemberRoles(member) {
-    return of('').pipe(
-      flatMap(() => this.getAllowedRoles(member.guild)),
-      flatMap(roles => from(roles).pipe(
-        filter(role => member.roles.has(role.id)),
-        toArray(),
-      )),
-    );
+  async getJoinedMemberRoles(member) {
+    const roles = await this.getAllowedRoles(member.guild);
+    return roles.filter(role => member.roles.has(role.id));
   }
 
-  getAvailableMemberRoles(member) {
-    return of('').pipe(
-      flatMap(() => this.getAllowedRoles(member.guild)),
-      flatMap(roles => from(roles).pipe(
-        filter(role => !member.roles.has(role.id)),
-        toArray(),
-      )),
-    );
+  async getAvailableMemberRoles(member) {
+    const roles = await this.getAllowedRoles(member.guild);
+    return roles.filter(role => !member.roles.has(role.id));
   }
 
-  _getAllowedRoleIds(guild) {
-    return of('').pipe(
-      flatMap(() => this.chaos.getGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS)),
-      map((allowedIds) => typeof allowedIds == "undefined" ? {} : allowedIds),
-    );
+  async _getAllowedRoleIds(guild) {
+    const allowedIds = await this.getGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS);
+    return (typeof allowedIds === "undefined" ? {} : allowedIds);
   }
 
-  _setAllowedRoleIds(guild, UserRoles) {
-    return of('').pipe(
-      flatMap(() => this.chaos.setGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS, UserRoles)),
-    );
+  async _setAllowedRoleIds(guild, UserRoles) {
+    return this.setGuildData(guild.id, DataKeys.ALLOWED_ROLE_IDS, UserRoles);
   }
 }
 

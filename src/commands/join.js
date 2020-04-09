@@ -1,10 +1,8 @@
-const {of} = require('rxjs');
-const {flatMap} = require('rxjs/operators');
 const {Command} = require("chaos-core");
+const {ChaosError} = require("chaos-core").errors;
+const {DiscordAPIError} = require('discord.js');
 
-const {catchChaosError} = require("../lib/error-handlers");
-const {catchJoinableRoleError} = require("../lib/error-handlers");
-const {catchDiscordApiError} = require("../lib/error-handlers");
+const {handleDiscordApiError, handleChaosError} = require("../lib/error-handlers");
 
 class JoinCommand extends Command {
   constructor(chaos) {
@@ -25,22 +23,27 @@ class JoinCommand extends Command {
     return super.strings.userRoles.commands.join;
   }
 
-  run(context, response) {
+  async run(context, response) {
     const UserRolesService = this.chaos.getService('UserRoles', 'UserRolesService');
     const roleService = this.chaos.getService('core', 'RoleService');
     const roleString = context.args.role;
 
-    return of('').pipe(
-      flatMap(() => roleService.findRole(context.guild, roleString)),
-      flatMap(role => UserRolesService.addUserToRole(context.member, role).pipe(
-        flatMap(() => response.send({
-          content: this.strings.addedToRole({roleName: role.name}),
-        })),
-      )),
-      catchDiscordApiError(context, response),
-      catchJoinableRoleError(context, response),
-      catchChaosError(context, response),
-    );
+    try {
+      const role = await roleService.findRole(context.guild, roleString).toPromise();
+      await UserRolesService.addUserToRole(context.member, role);
+      await response.send({
+        content: this.strings.addedToRole({roleName: role.name}),
+      }).toPromise();
+    } catch (error) {
+      switch (true) {
+        case error instanceof DiscordAPIError:
+          return handleDiscordApiError(error, response);
+        case error instanceof ChaosError:
+          return handleChaosError(error, response);
+        default:
+          throw error;
+      }
+    }
   }
 }
 
