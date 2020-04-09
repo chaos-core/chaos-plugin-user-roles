@@ -1,10 +1,10 @@
-const {of} = require('rxjs/index');
-const {flatMap} = require('rxjs/operators/index');
+const {of, throwError} = require('rxjs');
+const {flatMap, catchError} = require('rxjs/operators');
 const {Command} = require("chaos-core");
+const {ChaosError} = require("chaos-core").errors;
+const {DiscordAPIError} = require('discord.js');
 
-const {catchChaosError} = require("../lib/error-handlers");
-const {catchJoinableRoleError} = require("../lib/error-handlers");
-const {catchDiscordApiError} = require("../lib/error-handlers");
+const {handleDiscordApiError, handleChaosError} = require("../lib/error-handlers");
 
 class LeaveCommand extends Command {
   constructor(chaos) {
@@ -37,9 +37,16 @@ class LeaveCommand extends Command {
           content: this.strings.removedFromRole({roleName: role.name}),
         })),
       )),
-      catchDiscordApiError(context, response),
-      catchJoinableRoleError(context, response),
-      catchChaosError(context, response),
+      catchError((error) => {
+        switch (true) {
+          case error instanceof DiscordAPIError:
+            return handleDiscordApiError(error, response);
+          case error instanceof ChaosError:
+            return handleChaosError(error, response);
+          default:
+            return throwError(error);
+        }
+      }),
     );
   }
 }
