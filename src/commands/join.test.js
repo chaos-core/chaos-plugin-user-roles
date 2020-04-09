@@ -7,10 +7,9 @@ describe('Command: JoinCommand', function () {
   beforeEach(async function () {
     this.chaos = createChaosBot();
     this.message = new MockMessage();
-    await this.chaos.listen().toPromise();
+    await this.chaos.listen();
     await this.chaos.getService('core', 'PluginService')
-      .enablePlugin(this.message.guild.id, 'UserRoles')
-      .toPromise();
+      .enablePlugin(this.message.guild.id, 'UserRoles');
   });
 
   describe('!join {role}', function () {

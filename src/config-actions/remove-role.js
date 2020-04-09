@@ -25,7 +25,7 @@ class AddRoleAction extends ChaosCore.ConfigAction {
 
   async run(context) {
     try {
-      const role = await this.RoleService.findRole(context.guild, context.args.role).toPromise();
+      const role = await this.RoleService.findRole(context.guild, context.args.role);
       await this.UserRolesService.removeRole(role);
       return {
         status: 200,

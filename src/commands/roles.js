@@ -52,7 +52,7 @@ class RolesCommand extends Command {
       await response.send({
         content: this.strings.availableToJoin(),
         embed,
-      }).toPromise();
+      });
     } catch (error) {
       switch (true) {
         case error instanceof DiscordAPIError:

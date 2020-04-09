@@ -7,13 +7,11 @@ describe('Config: addRole', function () {
   beforeEach(async function () {
     this.chaos = createChaosBot();
     this.message = new MockMessage();
-    await this.chaos.listen().toPromise();
+    await this.chaos.listen();
     await this.chaos.getService('core', 'PermissionsService')
-      .addUser(this.message.guild, 'admin', this.message.author)
-      .toPromise();
+      .addUser(this.message.guild, 'admin', this.message.author);
     await this.chaos.getService('core', 'PluginService')
-      .enablePlugin(this.message.guild.id, 'UserRoles')
-      .toPromise();
+      .enablePlugin(this.message.guild.id, 'UserRoles');
   });
 
   describe('!config userRoles addRole', function () {

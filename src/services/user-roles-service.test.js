@@ -26,7 +26,7 @@ describe('Service: UserRolesService', function () {
     context('when the role is not marked as joinable', function () {
       it('marks the role as joinable', async function () {
         await this.userRolesService.allowRole(this.role);
-        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS).toPromise();
+        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS);
         expect(allowedIds[this.role.id]).to.be.true;
       });
     });
@@ -35,9 +35,7 @@ describe('Service: UserRolesService', function () {
       beforeEach(async function () {
         let allowedIds = {};
         allowedIds[this.role.id] = true;
-
-        await this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
-          .toPromise();
+        await this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds);
       });
 
       it('throws a UserRoleError', async function () {
@@ -61,12 +59,12 @@ describe('Service: UserRolesService', function () {
         allowedIds[this.role.id] = true;
 
         await this.chaos.setGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS, allowedIds)
-          .toPromise();
+          ;
       });
 
       it('marks the role as not joinable', async function () {
         await this.userRolesService.removeRole(this.role);
-        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS).toPromise();
+        const allowedIds = await this.chaos.getGuildData(this.guild.id, DataKeys.ALLOWED_ROLE_IDS);
         expect(allowedIds[this.role.id]).to.be.false;
       });
     });

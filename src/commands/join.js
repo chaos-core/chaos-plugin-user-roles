@@ -29,11 +29,11 @@ class JoinCommand extends Command {
     const roleString = context.args.role;
 
     try {
-      const role = await roleService.findRole(context.guild, roleString).toPromise();
+      const role = await roleService.findRole(context.guild, roleString);
       await UserRolesService.addUserToRole(context.member, role);
       await response.send({
         content: this.strings.addedToRole({roleName: role.name}),
-      }).toPromise();
+      });
     } catch (error) {
       switch (true) {
         case error instanceof DiscordAPIError:

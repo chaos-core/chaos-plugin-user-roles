@@ -1,21 +1,25 @@
-module.exports = {
-  name: "UserRoles",
-  description: "Allows users to add themselves to roles",
+const ChaosCore = require('chaos-core');
 
-  services: [
+class UserRolesPlugin extends ChaosCore.Plugin {
+  name = "UserRoles";
+  description = "Allows users to add themselves to roles";
+
+  services = [
     require('./services/user-roles-service'),
-  ],
+  ];
 
-  configActions: [
+  configActions = [
     require('./config-actions/add-role'),
     require('./config-actions/remove-role'),
-  ],
+  ];
 
-  commands: [
+  commands = [
     require('./commands/join'),
     require('./commands/leave'),
     require('./commands/roles'),
-  ],
+  ];
 
-  strings: require('./plugin.strings'),
-};
+  strings = require('./plugin.strings');
+}
+
+module.exports = UserRolesPlugin;

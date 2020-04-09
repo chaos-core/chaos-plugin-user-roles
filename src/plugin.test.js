@@ -12,12 +12,12 @@ describe('Plugin: UserRoles', function () {
 
     afterEach(async function () {
       if (this.chaos.listening) {
-        await this.chaos.shutdown().toPromise();
+        await this.chaos.shutdown();
       }
     });
 
     it('Allows the bot to load', async function () {
-      await this.chaos.listen().toPromise();
+      await this.chaos.listen();
     });
 
     it('Adds the plugin to the bot', function () {
