@@ -451,9 +451,10 @@ chalk@^3.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-"chaos-core@https://github.com/chaos-core/chaos-core.git#5.0.0-dev":
-  version "5.0.0-dev"
-  resolved "https://github.com/chaos-core/chaos-core.git#b509043d205831896222f2093101941a876c5f89"
+chaos-core@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/chaos-core/-/chaos-core-5.0.0.tgz#3638a4ec6e10a97ab42053f31fa1e4dfd7587a80"
+  integrity sha512-r4jcp7C3R+C12SYRtqZiO667KSukAeKP/zMOAiGn6zfNdfnW1gzbodVsUsg0mFaQcpcs3O4BKY92G8/O6hFsTw==
   dependencies:
     deepmerge "^4.2.2"
     winston "^3.2.1"
